@@ -32,11 +32,15 @@ if (error) {
   throw new Error(`Config validation error: ${error.message}`);
 }
 
+let DB_URL = process.env.MONGODB_URL.replace('<password>', process.env.MONGODB_PASSWORD);
+DB_URL = DB_URL.replace('<username>', process.env.MONGODB_USERNAME);
+DB_URL = DB_URL.replace('<database>', process.env.MONGODB_DATABASE);
+
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
   mongoose: {
-    url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
+    url: DB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {
       useCreateIndex: true,
       useNewUrlParser: true,

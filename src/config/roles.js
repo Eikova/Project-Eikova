@@ -1,6 +1,21 @@
+const userRoles = ['download', 'search'];
+const contributorRoles = [...userRoles, 'managePhotos'];
+const adminRoles = [
+  ...contributorRoles,
+  'getUsers',
+  'manageUsers',
+  'manageContributors',
+  'manageMeetings',
+  'grantAccess',
+  'revokeAccess',
+];
+const superAdminRoles = [...adminRoles, 'manageAdmin'];
+
 const allRoles = {
-  user: [],
-  admin: ['getUsers', 'manageUsers'],
+  user: userRoles,
+  contributor: contributorRoles,
+  admin: adminRoles,
+  superadmin: superAdminRoles,
 };
 
 const roles = Object.keys(allRoles);

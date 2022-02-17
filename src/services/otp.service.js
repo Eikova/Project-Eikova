@@ -20,16 +20,13 @@ const generateOTP = async (email) => {
 };
 
 const verifyOTP = async (email, code) => {
-  const otp = await OTP.findOne({
-    where: {
-      email,
-      code,
-    },
-  });
+  const otp = await OTP.findOne({ email, code });
   if (!otp) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid OTP');
+    return false;
   }
-  return otp;
+  otp.is_expired = true;
+  otp.save();
+  return true;
 };
 
 module.exports = {

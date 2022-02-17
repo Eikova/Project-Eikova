@@ -11,9 +11,9 @@ describe('OTPService', () => {
 
   describe('Generate and Save User OTP', () => {
     it('should save an OTP for a user', async () => {
-      const user = 'admin@test.com';
-      const response = await OTPService.generateOTP(user);
-      expect(response.email).toBe(user);
+      const email = 'admin@test.com';
+      const response = await OTPService.generateOTP(email);
+      expect(response).toHaveProperty('email');
     });
   });
 });

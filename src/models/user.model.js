@@ -2,13 +2,12 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
-const { roles } = require('../config/roles');
+const { ROLE } = require('../config/roles');
 
 const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
       trim: true,
     },
     email: {
@@ -17,15 +16,14 @@ const userSchema = mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error('Invalid email');
-        }
-      },
+      // validate(value) {
+      //   if (!validator.isEmail(value)) {
+      //     throw new Error('Invalid email');
+      //   }
+      // },
     },
     password: {
       type: String,
-      required: true,
       trim: true,
       minlength: 8,
       validate(value) {
@@ -37,8 +35,21 @@ const userSchema = mongoose.Schema(
     },
     role: {
       type: String,
-      enum: roles,
-      default: 'user',
+      enum: Object.values(ROLE),
+      default: ROLE.USER,
+    },
+    status: {
+      type: String,
+      enum: ['active','disabled'],
+      default: 'disabled',
+    },
+    department: {
+      type: String,
+      trim: true,
+    },
+    role2: {
+      type: String,
+      trim: true,
     },
     isEmailVerified: {
       type: Boolean,

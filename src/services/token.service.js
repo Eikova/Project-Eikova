@@ -6,6 +6,7 @@ const userService = require('./user.service');
 const { Token } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
+const { ROLE } = require('../config/roles');
 
 /**
  * Generate token
@@ -24,6 +25,18 @@ const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
   };
   return jwt.sign(payload, secret);
 };
+
+
+// const generateUserToken = (email, role, expires, type, secret = config.jwt.secret) => {
+//   const payload = {
+//     email: email,
+//     role: role,
+//     iat: moment().unix(),
+//     exp: expires.unix(),
+//     type,
+//   };
+//   return jwt.sign(payload, secret);
+// };
 
 /**
  * Save a token
@@ -45,6 +58,8 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
   return tokenDoc;
 };
 
+
+
 /**
  * Verify token and return token doc (or throw an error if it is not valid)
  * @param {string} token
@@ -59,6 +74,45 @@ const verifyToken = async (token, type) => {
   }
   return tokenDoc;
 };
+
+// const verifyUserToken = async (token, type) => {
+//   const payload = jwt.verify(token, config.jwt.secret);
+//   const tokenDoc = await Token.findOne({ token, type, user: payload.sub, blacklisted: false });
+//   if (!tokenDoc) {
+//     throw new Error('Token not found');
+//   }
+//   return tokenDoc;
+// };
+
+
+// const revokeUserInvitationTokens = async (user) => {
+//   await Token.deleteMany({ user: user.id, type: tokenTypes.USER_INVITATION });
+//   return true;
+// };
+
+const generateUserInvitationToken = async (user) => {
+  //check if there is a user with this email
+  // const user = await userService.getUserByEmail(email);
+  //confirm if the user has this role
+  // if (!user) {
+    const expires = moment().add(config.jwt.userInvitationExpirationMinutes, 'minutes');
+    const userInvitationToken = generateToken(user.id, expires, tokenTypes.USER_INVITATION);
+    await saveToken(userInvitationToken, user.id, expires, tokenTypes.USER_INVITATION);
+    console.log(userInvitationToken,"UserIvitaionToken")
+    return {userInvitationToken};
+  // }
+
+  //if there is a user? check if the role is same as the user role
+  // else{
+  //   //check if role is the same as role of the user in DB and user is a user
+  //   if(user.role === role && role == ROLE.user){
+     
+  //   }
+  // }
+  //if user? generate a new token
+
+};
+
 
 /**
  * Generate auth tokens
@@ -113,6 +167,15 @@ const generateVerifyEmailToken = async (user) => {
   return verifyEmailToken;
 };
 
+const generateSignUpToken = async (user) => {
+  console.log(user)
+  const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+  const signUpToken = generateToken(user.id, expires, tokenTypes.ACCESS);
+  await saveToken(signUpToken, user.id, expires, tokenTypes.ACCESS);
+  // console.log(signUpToken,"SignUpToken")
+  return signUpToken;
+};
+
 module.exports = {
   generateToken,
   saveToken,
@@ -120,4 +183,7 @@ module.exports = {
   generateAuthTokens,
   generateResetPasswordToken,
   generateVerifyEmailToken,
+  // generateToken2,
+  generateUserInvitationToken,
+  generateSignUpToken
 };

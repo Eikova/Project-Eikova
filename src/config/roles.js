@@ -20,10 +20,18 @@ const allRoles = {
   superadmin: superAdminRoles,
 };
 
+const ROLE = {
+  USER: 'user',
+  CONTRIBUTOR: 'contributor',
+  ADMIN: 'admin',
+  SUPERADMIN: 'super-admin'
+}
+
 const roles = Object.keys(allRoles);
 const roleRights = new Map(Object.entries(allRoles));
 
 module.exports = {
+  ROLE,
   roles,
   roleRights,
 };

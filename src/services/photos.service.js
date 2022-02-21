@@ -30,7 +30,7 @@ const uploadToS3 = (path, newName, bucket) => {
   return s3.upload(params).promise();
 };
 
-const uploadPhoto = async (obj, file) => {
+const uploadPhoto = async (obj, file, isDraft = false) => {
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;
@@ -51,7 +51,7 @@ const uploadPhoto = async (obj, file) => {
     await unlinkAsync(file.path);
     await unlinkAsync(thumbnailPath);
 
-    return await Photos.create({
+    const photoData = {
       url: photo.Location,
       thumbnail: thumbnail.Location,
       description: obj.description,
@@ -60,7 +60,12 @@ const uploadPhoto = async (obj, file) => {
       year: obj.year,
       month: obj.month,
       meeting_id: obj.meeting_id,
-    });
+    };
+
+    if (!isDraft) {
+      photoData.is_published = true;
+    }
+    return await Photos.create({ ...photoData });
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }

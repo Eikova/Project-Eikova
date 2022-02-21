@@ -9,9 +9,12 @@ const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
 router
-  .route('/')
+  .route('/upload')
   .post(auth('managePhotos'), upload.single('image'), photoController.createPhoto)
-  //.get(auth('managePhotos'), photoController.getUsers);
+
+router
+  .route('/drafts')
+  .post(auth('managePhotos'), upload.single('image'), photoController.createDraft)
 
 
 module.exports = router;

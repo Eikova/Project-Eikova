@@ -1,9 +1,12 @@
 const httpStatus = require('http-status');
-const { Photos } = require('../models');
-const ApiError = require('../utils/ApiError');
+const sharp = require('sharp');
 const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
-const path = require('path');
+const { promisify } = require('util');
+
+const unlinkAsync = promisify(fs.unlink);
+const { Photos } = require('../models');
+const ApiError = require('../utils/ApiError');
 
 const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION,
@@ -11,15 +14,15 @@ const s3 = new S3({
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
 });
 
-const uploadToS3 = (file, bucket) => {
+const uploadToS3 = (path, newName, bucket) => {
   // Read content from the file
   // eslint-disable-next-line security/detect-non-literal-fs-filename
-  const fileStream = fs.createReadStream(file.path);
+  const fileStream = fs.createReadStream(path);
 
   // Setting up S3 upload parameters
   const params = {
     Bucket: bucket,
-    Key: file.filename,
+    Key: newName,
     Body: fileStream,
   };
 
@@ -28,12 +31,25 @@ const uploadToS3 = (file, bucket) => {
 };
 
 const uploadPhoto = async (obj, file) => {
+  const str = obj.title.replaceAll(' ', '_');
+  const fileNameMain = `${str}_main_${Date.now()}`;
+  const fileNameThumb = `${str}_thumb_${Date.now()}`;
+
   try {
     const bucketMain = process.env.AWS_BUCKET_MAIN;
-    const photo = await uploadToS3(file, bucketMain);
-    // upload thumbnail
+    const photo = await uploadToS3(file.path, fileNameMain, bucketMain);
+    // upload thumbnails
+
+    const thumbWebp = await sharp(file.path)
+      .resize(300, 300)
+      .toFile(`uploads/${fileNameThumb}.webp`);
+    const thumbnailPath = `uploads/${fileNameThumb}.webp`;
+
     const bucketThumbnail = process.env.AWS_BUCKET_THUMBNAILS;
-    const thumbnail = await uploadToS3(file, bucketThumbnail);
+    const thumbnail = await uploadToS3(thumbnailPath, fileNameThumb, bucketThumbnail);
+
+    await unlinkAsync(file.path);
+    await unlinkAsync(thumbnailPath);
 
     return await Photos.create({
       url: photo.Location,

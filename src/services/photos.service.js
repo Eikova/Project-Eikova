@@ -38,8 +38,8 @@ const uploadPhoto = async (obj, file, isDraft = false) => {
   try {
     const bucketMain = process.env.AWS_BUCKET_MAIN;
     const photo = await uploadToS3(file.path, fileNameMain, bucketMain);
-    // upload thumbnails
 
+    // upload thumbnails
     const thumbWebp = await sharp(file.path)
       .resize(300, 300)
       .toFile(`uploads/${fileNameThumb}.webp`);
@@ -47,6 +47,8 @@ const uploadPhoto = async (obj, file, isDraft = false) => {
 
     const bucketThumbnail = process.env.AWS_BUCKET_THUMBNAILS;
     const thumbnail = await uploadToS3(thumbnailPath, fileNameThumb, bucketThumbnail);
+
+    const meta = await sharp(file.path).metadata();
 
     await unlinkAsync(file.path);
     await unlinkAsync(thumbnailPath);
@@ -60,6 +62,7 @@ const uploadPhoto = async (obj, file, isDraft = false) => {
       year: obj.year,
       month: obj.month,
       meeting_id: obj.meeting_id,
+      metadata: meta,
     };
 
     if (!isDraft) {
@@ -71,6 +74,15 @@ const uploadPhoto = async (obj, file, isDraft = false) => {
   }
 };
 
+const getPhotos = async (options) => {
+  try {
+    return await Photos.paginate({ is_published: true, is_private: false }, options);
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
 module.exports = {
   uploadPhoto,
+  getPhotos,
 };

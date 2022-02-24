@@ -25,6 +25,10 @@ const PhotoSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    is_private: {
+      type: Boolean,
+      default: false,
+    },
     year: {
       type: Number,
       required: [true, 'A year must be provided'],

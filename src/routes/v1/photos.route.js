@@ -11,7 +11,17 @@ const router = express.Router();
 
 router
   .route('/')
-  .get(auth('managePhotos'), photoController.getPhotos)
+  .get(auth('download'), photoController.getPhotos)
+
+router
+  .route('/:id')
+  .get(auth('download'), photoController.getPhoto)
+  .patch(auth('managePhotos'), photoController.updatePhoto)
+  .delete(auth('fullPhotoAccess'), photoController.deletePhoto)
+
+router
+  .route('/:id/download')
+  .get(auth('download'), photoController.downloadPhoto)
 
 router
   .route('/upload')
@@ -21,6 +31,9 @@ router
   .route('/drafts')
   .post(auth('managePhotos'), upload.single('image'), photoController.createDraft)
 
+router
+  .route('/:id/private')
+  .patch(auth('fullPhotoAccess'), photoController.makePhotoPrivate)
 
 
 module.exports = router;

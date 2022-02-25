@@ -38,8 +38,85 @@ const getPhotos = catchAsync(async (req, res) => {
   });
 });
 
+const downloadPhoto = catchAsync(async (req, res) => {
+  const photo = await PhotoService.downloadPhoto(req.params.id);
+  if (!photo) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      status: httpStatus.NOT_FOUND,
+      message: 'Photo not found',
+    });
+  }
+  const { url } = photo;
+  res.status(httpStatus.OK).json({
+    url,
+  });
+});
+
+const makePhotoPrivate = catchAsync(async (req, res) => {
+  const photo = await PhotoService.makePhotoPrivate(req.params.id);
+  if (!photo) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      status: httpStatus.NOT_FOUND,
+      message: 'Photo not found',
+    });
+  }
+  res.status(httpStatus.OK).json({
+    status: httpStatus.OK,
+    message: 'Photo made private',
+    photo,
+  });
+});
+
+const deletePhoto = catchAsync(async (req, res) => {
+  const photo = await PhotoService.deletePhoto(req.params.id);
+  if (!photo) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      status: httpStatus.NOT_FOUND,
+      message: 'Photo not found',
+    });
+  }
+  res.status(httpStatus.NO_CONTENT).json({
+    message: 'Photo deleted',
+  });
+});
+
+const getPhoto = catchAsync(async (req, res) => {
+  const photo = await PhotoService.getPhoto(req.params.id);
+  if (!photo) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      status: httpStatus.NOT_FOUND,
+      message: 'Photo not found',
+    });
+  }
+  res.status(httpStatus.OK).json({
+    status: httpStatus.OK,
+    message: 'Photo fetched successfully',
+    photo,
+  });
+});
+
+const updatePhoto = catchAsync(async (req, res) => {
+  const photo = await PhotoService.updatePhoto(req.params.id, req.body);
+  if (!photo) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      status: httpStatus.NOT_FOUND,
+      message: 'Photo not found',
+    });
+  }
+  res.status(httpStatus.OK).json({
+    status: httpStatus.OK,
+    message: 'Photo edited successfully',
+    photo,
+  });
+});
+
 module.exports = {
   createPhoto,
   createDraft,
   getPhotos,
+  downloadPhoto,
+  makePhotoPrivate,
+  deletePhoto,
+  getPhoto,
+  updatePhoto,
 };

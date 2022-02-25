@@ -8,6 +8,7 @@ const adminRoles = [
   'manageMeetings',
   'grantAccess',
   'revokeAccess',
+  'fullPhotoAccess',
 ];
 const superAdminRoles = [...adminRoles, 'manageAdmin'];
 

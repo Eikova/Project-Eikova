@@ -82,7 +82,61 @@ const getPhotos = async (options) => {
   }
 };
 
+const getPhoto = async (id) => {
+  try {
+    return await Photos.findOne({ _id: id, is_deleted: false });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const downloadPhoto = async (id) => {
+  try {
+    return await Photos.findByIdAndUpdate(id, { $inc: { downloads: 1 }, modified_at: Date.now() }, { new: true });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const makePhotoPrivate = async (id) => {
+  try {
+    return await Photos.findByIdAndUpdate(id, { is_private: true, modified_at: Date.now() }, { new: true });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const deletePhoto = async (id) => {
+  try {
+    return await Photos.findByIdAndUpdate(id, { is_deleted: true, modified_at: Date.now() }, { new: true });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const updatePhoto = async (id, obj) => {
+  // this endpoint does not allow a change to the photo itself, just it's properties.
+  try {
+    const photo = await Photos.findOne({ _id: id, is_private: false, is_deleted: false });
+    const data = {};
+    data.title = obj.title ? obj.title : photo.title;
+    data.description = obj.description ? obj.description : photo.description;
+    data.tags = obj.tags ? obj.tags : photo.tags;
+    data.year = obj.year ? obj.year : photo.year;
+    data.month = obj.month ? obj.month : photo.month;
+    data.meeting_id = obj.meeting_id ? obj.meeting_id : photo.meeting_id;
+    return await Photos.findByIdAndUpdate(id, { ...data, modified_at: Date.now() }, { new: true });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
 module.exports = {
   uploadPhoto,
   getPhotos,
+  downloadPhoto,
+  makePhotoPrivate,
+  deletePhoto,
+  getPhoto,
+  updatePhoto,
 };

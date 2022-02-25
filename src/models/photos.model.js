@@ -29,6 +29,14 @@ const PhotoSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    is_deleted: {
+      type: Boolean,
+      default: false,
+    },
+    downloads: {
+      type: Number,
+      default: 0,
+    },
     year: {
       type: Number,
       required: [true, 'A year must be provided'],

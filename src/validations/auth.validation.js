@@ -24,6 +24,16 @@ const invite = {
     name:  Joi.string().required(),
     email: Joi.string().required(),
     role: Joi.string().required(),
+
+  }),
+};
+
+const invite2 = {
+  body: Joi.object().keys({
+    name:  Joi.string().required(),
+    email: Joi.string().required(),
+    role: Joi.string().required(),
+
   }),
 };
 
@@ -66,6 +76,18 @@ const verifyInvite = {
   }),
 };
 
+// const verifyUserInvite = {
+//   query: Joi.object().keys({
+//     token: Joi.string().required(),
+//   }),
+// };
+
+// const loginUser = {
+//   query: Joi.object().keys({
+//     token: Joi.string().required(),
+//   }),
+// };
+
 module.exports = {
   register,
   login,
@@ -75,5 +97,6 @@ module.exports = {
   resetPassword,
   verifyEmail,
   invite,
-  verifyInvite
+  verifyInvite,
+  invite2
 };

@@ -56,10 +56,17 @@ If you did not create an account, then ignore this email.`;
 };
 
 const sendInviteEmail = async (to, token) => {
-  const subject = 'Eikova Access';
+  const subject = 'Eikova Invite';
   // replace this url with the link to the email verification page of your front-end app
   const inviteUrl = `http://eikova.photos/auth/verify-invite?token=${token}`;
   const text = `Hi there, Welcome to Eikova, to complete your registration kindly click on the link ${inviteUrl}`;
+  await sendEmail(to, subject, text);
+};
+
+const sendUserInviteEmail = async (to, token) => {
+  const subject = 'Eikova Invite';
+  // replace this url with the link to the email verification page of your front-end app
+  const text = `Hi there, Welcome to Eikova, to download pictures, kindly use this passcode:  ${token}`;
   await sendEmail(to, subject, text);
 };
 
@@ -68,5 +75,6 @@ module.exports = {
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
-  sendInviteEmail
+  sendInviteEmail,
+  sendUserInviteEmail
 };

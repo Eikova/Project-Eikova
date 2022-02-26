@@ -29,6 +29,8 @@ const updateUser = catchAsync(async (req, res) => {
   res.send(user);
 });
 
+
+//Just implemented this not sure of use
 const deleteUser = catchAsync(async (req, res) => {
   await userService.deleteUserById(req.params.userId);
   res.status(httpStatus.NO_CONTENT).send();

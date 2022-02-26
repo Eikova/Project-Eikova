@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
 
-const OTPSchema = mongoose.Schema(
+const otpSchema = mongoose.Schema(
   {
     code: {
       type: String,
@@ -28,19 +28,13 @@ const OTPSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-OTPSchema.plugin(toJSON);
-OTPSchema.plugin(paginate);
-/*
-user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
- */
+otpSchema.plugin(toJSON);
+otpSchema.plugin(paginate);
+
 
 /**
  * @typedef OTP
  */
-const OTP = mongoose.model('OTP', OTPSchema);
+const Otp = mongoose.model('OTP', otpSchema);
 
-module.exports = OTP;
+module.exports = Otp;

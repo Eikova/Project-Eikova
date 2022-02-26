@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService, emailService } = require('../services');
+const { authService, userService, tokenService, emailService, otpService } = require('../services');
 const ApiError = require('../utils/ApiError');
 
 const register = catchAsync(async (req, res) => {
@@ -14,6 +14,36 @@ const login = catchAsync(async (req, res) => {
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
   res.send({ user, tokens });
+});
+
+
+const inviteUser = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+  const otp = await otpService.generateOTP (email, password);
+  await emailService.sendUserInviteEmail(email, otp.code);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const userLogin = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+  const verify = await otpService.verifyOTP(email, password);
+  console.log(verify)
+  if(!verify){
+    throw new ApiError(httpStatus.BAD_REQUEST, 'invalid Email or Token');
+  }
+  const getUser = await userService.getUserByEmail(email)
+  if(!getUser){
+    let user = await userService.createUser(req.body);
+    user = await userService.updateUserById(user.id, {status:'active'});
+    const tokens = await tokenService.generateOneTimeToken(user);
+    res.send({ user, tokens });
+  }
+  else{
+    const tokens = await tokenService.generateOneTimeToken(getUser);
+    res.send({ user:getUser, tokens });
+  }
+
+
 });
 
 const logout = catchAsync(async (req, res) => {
@@ -38,25 +68,23 @@ const resetPassword = catchAsync(async (req, res) => {
 });
 
 
-const verifyUserInvitation = catchAsync(async (req, res) => {
+const verifyInvite = catchAsync(async (req, res) => {
   const user = await authService.verifyInvitation(req.query.token);
   console.log(user)
   const token = await tokenService.generateSignUpToken(user);
-  // console.log(token)
   res.send({ user, token, redirectUrl: `http://frontend.com?token=${token}&email=${user.email}` });
 });
 
 
-const sendInvite = catchAsync(async (req, res) => {
+const invite = catchAsync(async (req, res) => {
   const { name, email, role } = req.body;
   const user = await authService.inviteUser(name,email,role);
   //if User is a user, send Code, else, send, email link
   await emailService.sendInviteEmail(email, user.token.userInvitationToken);
-  res.status(httpStatus.OK).send(user);
+  res.status(httpStatus.NO_CONTENT).send();
 });
 
-const userSignUp = catchAsync(async (req, res) => {
-  console.log(req.body.token,"======> Body Token")
+const completeSignup = catchAsync(async (req, res) => {
   let user = await authService.verifyUserSignUp(req.body.token);
 
   const { email } = user;
@@ -67,9 +95,7 @@ const userSignUp = catchAsync(async (req, res) => {
   user = await userService.getUserById(user.id);
 
   user = await userService.updateUserById(user.id, req.body);
-  // user = await userService.getUserById(user.id, ['workspace']);
   const tokens = await tokenService.generateAuthTokens(user);
-  // onboardingService.createOnboarding({ user: user.id, stages: [ONBOARDING_STAGES.USER.SIGNED_UP] });
 
   res.send({ user, tokens });
 });
@@ -81,7 +107,9 @@ module.exports = {
   refreshTokens,
   forgotPassword,
   resetPassword,
-  sendInvite,
-  verifyUserInvitation,
-  userSignUp
+  invite,
+  verifyInvite,
+  completeSignup,
+  userLogin,
+  inviteUser
 };

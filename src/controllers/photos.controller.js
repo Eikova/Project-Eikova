@@ -52,8 +52,8 @@ const downloadPhoto = catchAsync(async (req, res) => {
   });
 });
 
-const makePhotoPrivate = catchAsync(async (req, res) => {
-  const photo = await PhotoService.makePhotoPrivate(req.params.id);
+const togglePhotoPrivacy = catchAsync(async (req, res) => {
+  const photo = await PhotoService.togglePhotoPrivacy(req.params.id);
   if (!photo) {
     return res.status(httpStatus.NOT_FOUND).json({
       status: httpStatus.NOT_FOUND,
@@ -62,7 +62,7 @@ const makePhotoPrivate = catchAsync(async (req, res) => {
   }
   res.status(httpStatus.OK).json({
     status: httpStatus.OK,
-    message: 'Photo made private',
+    message: 'Photo privacy changed successfully',
     photo,
   });
 });
@@ -115,7 +115,7 @@ module.exports = {
   createDraft,
   getPhotos,
   downloadPhoto,
-  makePhotoPrivate,
+  togglePhotoPrivacy,
   deletePhoto,
   getPhoto,
   updatePhoto,

@@ -98,9 +98,11 @@ const downloadPhoto = async (id) => {
   }
 };
 
-const makePhotoPrivate = async (id) => {
+const togglePhotoPrivacy = async (id) => {
   try {
-    return await Photos.findByIdAndUpdate(id, { is_private: true, modified_at: Date.now() }, { new: true });
+    const photo = await getPhoto(id);
+    const privacy = photo.is_private;
+    return await Photos.findByIdAndUpdate(id, { is_private: !privacy, modified_at: Date.now() }, { new: true });
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -135,7 +137,7 @@ module.exports = {
   uploadPhoto,
   getPhotos,
   downloadPhoto,
-  makePhotoPrivate,
+  togglePhotoPrivacy,
   deletePhoto,
   getPhoto,
   updatePhoto,

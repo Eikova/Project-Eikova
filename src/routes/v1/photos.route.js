@@ -32,8 +32,8 @@ router
   .post(auth('managePhotos'), upload.single('image'), photoController.createDraft)
 
 router
-  .route('/:id/private')
-  .patch(auth('fullPhotoAccess'), photoController.makePhotoPrivate)
+  .route('/:id/toggle-privacy')
+  .patch(auth('fullPhotoAccess'), photoController.togglePhotoPrivacy)
 
 
 module.exports = router;

@@ -38,6 +38,21 @@ const getPhotos = catchAsync(async (req, res) => {
   });
 });
 
+const getPrivatePhotos = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (req.query.sortBy === 'oldest') {
+    options.sortBy = 'asc';
+  } else {
+    options.sortBy = 'desc';
+  }
+  const photos = await PhotoService.getPrivatePhotos(options);
+  res.status(httpStatus.OK).json({
+    status: httpStatus.OK,
+    message: 'Photos fetched successfully',
+    photos,
+  });
+});
+
 const downloadPhoto = catchAsync(async (req, res) => {
   const photo = await PhotoService.downloadPhoto(req.params.id);
   if (!photo) {
@@ -110,6 +125,20 @@ const updatePhoto = catchAsync(async (req, res) => {
   });
 });
 
+const publishDraft = catchAsync(async (req, res) => {
+  const photo = await PhotoService.publishDraft(req.params.id);
+  if (!photo) {
+    return res.status(httpStatus.NOT_FOUND).json({
+      status: httpStatus.NOT_FOUND,
+      message: 'Photo not found',
+    });
+  }
+  res.status(httpStatus.OK).json({
+    message: 'Draft Published',
+    photo,
+  });
+});
+
 module.exports = {
   createPhoto,
   createDraft,
@@ -119,4 +148,6 @@ module.exports = {
   deletePhoto,
   getPhoto,
   updatePhoto,
+  getPrivatePhotos,
+  publishDraft,
 };

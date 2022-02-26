@@ -14,6 +14,10 @@ router
   .get(auth('download'), photoController.getPhotos)
 
 router
+  .route('/private')
+  .get(auth('fullPhotoAccess'), photoController.getPrivatePhotos)
+
+router
   .route('/:id')
   .get(auth('download'), photoController.getPhoto)
   .patch(auth('managePhotos'), photoController.updatePhoto)
@@ -30,6 +34,10 @@ router
 router
   .route('/drafts')
   .post(auth('managePhotos'), upload.single('image'), photoController.createDraft)
+
+router
+  .route('/drafts/:id/publish')
+  .patch(auth('managePhotos'), photoController.publishDraft)
 
 router
   .route('/:id/toggle-privacy')

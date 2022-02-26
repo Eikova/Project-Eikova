@@ -76,7 +76,15 @@ const uploadPhoto = async (obj, file, isDraft = false) => {
 
 const getPhotos = async (options) => {
   try {
-    return await Photos.paginate({ is_published: true, is_private: false }, options);
+    return await Photos.paginate({ is_published: true, is_deleted: false, is_private: false }, options);
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const getPrivatePhotos = async (options) => {
+  try {
+    return await Photos.paginate({ is_deleted: false, is_private: true }, options);
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -133,6 +141,14 @@ const updatePhoto = async (id, obj) => {
   }
 };
 
+const publishDraft = async (id) => {
+  try {
+    return await Photos.findByIdAndUpdate(id, { is_published: true, modified_at: Date.now() }, { new: true });
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
 module.exports = {
   uploadPhoto,
   getPhotos,
@@ -141,4 +157,6 @@ module.exports = {
   deletePhoto,
   getPhoto,
   updatePhoto,
+  getPrivatePhotos,
+  publishDraft,
 };

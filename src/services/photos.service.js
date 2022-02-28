@@ -3,6 +3,7 @@ const sharp = require('sharp');
 const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
 const { promisify } = require('util');
+const ExifReader = require('exifreader');
 
 const unlinkAsync = promisify(fs.unlink);
 const { Photos } = require('../models');
@@ -14,7 +15,7 @@ const s3 = new S3({
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
 });
 
-const uploadToS3 = (path, newName, bucket) => {
+const uploadToS3 = async(path, newName, bucket) => {
   // Read content from the file
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   const fileStream = fs.createReadStream(path);
@@ -25,12 +26,87 @@ const uploadToS3 = (path, newName, bucket) => {
     Key: newName,
     Body: fileStream,
   };
-
   // Uploading files to the bucket
   return s3.upload(params).promise();
 };
 
+const deleteFromS3 = (path, bucket) => {
+  // Setting up S3 delete parameters
+  const params = {
+    Bucket: bucket,
+    Key: path,
+  };
+  // Deleting files from the bucket
+  return s3.deleteObject(params).promise();
+};
+
+const destroyPhoto = async (path, bucket) => {
+  try {
+    await deleteFromS3(path, bucket);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+const getMetadata = async (path) => {
+  const meta = await ExifReader.load(path);
+
+  delete meta.MakerNote;
+  delete meta.MPEntry;
+  delete meta.Images;
+  delete meta.UserComment;
+  delete meta.CFAPattern;
+  return meta;
+};
+
+const replacePhoto = async (id, file) => {
+
+  try {
+    const photo = await Photos.findById(id);
+    if (!photo) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Photo not found');
+    }
+    const meta = await getMetadata(file.path);
+
+    // destroy old photo
+    const { url, thumbnail } = photo;
+    const bucketMain = process.env.AWS_BUCKET_MAIN;
+    const bucketThumbnail = process.env.AWS_BUCKET_THUMBNAILS;
+    await destroyPhoto(url, bucketMain);
+    await destroyPhoto(thumbnail, bucketThumbnail);
+
+    // process new photo
+    const str = photo.title.replaceAll(' ', '_');
+    const newNameMain = `${str}_main_${Date.now()}`;
+    const newNameThumb = `${str}_thumb_${Date.now()}`;
+    const newPhoto = await uploadToS3(file.path, newNameMain, bucketMain);
+
+    // upload new thumbnail
+    const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${newNameThumb}.webp`);
+    const thumbnailPath = `uploads/${newNameThumb}.webp`;
+    const newThumbnail = await uploadToS3(thumbnailPath, newNameThumb, bucketThumbnail);
+
+    // const meta = await getMetadata(file.path);
+
+    await unlinkAsync(file.path);
+    await unlinkAsync(thumbnailPath);
+
+    // save to db
+    const newPhotoDetails = {
+      url: newPhoto.Location,
+      thumbnail: newThumbnail.Location,
+      metadata: meta,
+    };
+    return await Photos.findByIdAndUpdate(id, newPhotoDetails);
+  } catch (err) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err);
+  }
+};
+
 const uploadPhoto = async (obj, file, isDraft = false) => {
+  const meta = await getMetadata(file.path);
+
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;
@@ -40,15 +116,13 @@ const uploadPhoto = async (obj, file, isDraft = false) => {
     const photo = await uploadToS3(file.path, fileNameMain, bucketMain);
 
     // upload thumbnails
-    const thumbWebp = await sharp(file.path)
-      .resize(300, 300)
-      .toFile(`uploads/${fileNameThumb}.webp`);
+    const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${fileNameThumb}.webp`);
     const thumbnailPath = `uploads/${fileNameThumb}.webp`;
 
     const bucketThumbnail = process.env.AWS_BUCKET_THUMBNAILS;
     const thumbnail = await uploadToS3(thumbnailPath, fileNameThumb, bucketThumbnail);
 
-    const meta = await sharp(file.path).metadata();
+    // const meta = await sharp(file.path).metadata();
 
     await unlinkAsync(file.path);
     await unlinkAsync(thumbnailPath);
@@ -159,4 +233,5 @@ module.exports = {
   updatePhoto,
   getPrivatePhotos,
   publishDraft,
+  replacePhoto,
 };

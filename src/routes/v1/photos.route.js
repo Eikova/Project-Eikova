@@ -28,6 +28,10 @@ router
   .get(auth('download'), photoController.downloadPhoto)
 
 router
+  .route('/:id/replace')
+  .patch(auth('managePhotos'), upload.single('image'), photoController.replacePhoto)
+
+router
   .route('/upload')
   .post(auth('managePhotos'), upload.single('image'), photoController.createPhoto)
 

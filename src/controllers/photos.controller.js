@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const sharp = require('sharp');
+
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
@@ -10,6 +10,15 @@ const createPhoto = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).json({
     status: httpStatus.CREATED,
     message: 'Photo uploaded successfully',
+    data: photo,
+  });
+});
+
+const replacePhoto = catchAsync(async (req, res) => {
+  const photo = await PhotoService.replacePhoto(req.params.id, req.file);
+  res.status(httpStatus.OK).json({
+    status: httpStatus.OK,
+    message: 'Photo replaced successfully',
     data: photo,
   });
 });
@@ -150,4 +159,5 @@ module.exports = {
   updatePhoto,
   getPrivatePhotos,
   publishDraft,
+  replacePhoto,
 };

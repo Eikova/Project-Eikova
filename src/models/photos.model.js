@@ -48,6 +48,10 @@ const PhotoSchema = mongoose.Schema(
     meeting_id: {
       type: String,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     timestamps: true,

@@ -6,7 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 const { PhotoService } = require('../services');
 
 const createPhoto = catchAsync(async (req, res) => {
-  const photo = await PhotoService.uploadPhoto(req.body, req.file);
+  const photo = await PhotoService.uploadPhoto(req.body, req.file, req.user.id);
   res.status(httpStatus.CREATED).json({
     status: httpStatus.CREATED,
     message: 'Photo uploaded successfully',
@@ -24,7 +24,7 @@ const replacePhoto = catchAsync(async (req, res) => {
 });
 
 const createDraft = catchAsync(async (req, res) => {
-  const photo = await PhotoService.uploadPhoto(req.body, req.file, true);
+  const photo = await PhotoService.uploadPhoto(req.body, req.file, req.user.id, true);
   res.status(httpStatus.CREATED).json({
     status: httpStatus.CREATED,
     message: 'Draft created!',
@@ -55,6 +55,21 @@ const getPrivatePhotos = catchAsync(async (req, res) => {
     options.sortBy = 'desc';
   }
   const photos = await PhotoService.getPrivatePhotos(options);
+  res.status(httpStatus.OK).json({
+    status: httpStatus.OK,
+    message: 'Photos fetched successfully',
+    photos,
+  });
+});
+
+const getContributions = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (req.query.sortBy === 'oldest') {
+    options.sortBy = 'asc';
+  } else {
+    options.sortBy = 'desc';
+  }
+  const photos = await PhotoService.getContributions(req.params.userId, options);
   res.status(httpStatus.OK).json({
     status: httpStatus.OK,
     message: 'Photos fetched successfully',
@@ -160,4 +175,5 @@ module.exports = {
   getPrivatePhotos,
   publishDraft,
   replacePhoto,
+  getContributions,
 };

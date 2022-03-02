@@ -104,7 +104,7 @@ const replacePhoto = async (id, file) => {
   }
 };
 
-const uploadPhoto = async (obj, file, isDraft = false) => {
+const uploadPhoto = async (obj, file, userId, isDraft = false) => {
   const meta = await getMetadata(file.path);
 
   const str = obj.title.replaceAll(' ', '_');
@@ -137,6 +137,7 @@ const uploadPhoto = async (obj, file, isDraft = false) => {
       month: obj.month,
       meeting_id: obj.meeting_id,
       metadata: meta,
+      user: userId,
     };
 
     if (!isDraft) {
@@ -159,6 +160,14 @@ const getPhotos = async (options) => {
 const getPrivatePhotos = async (options) => {
   try {
     return await Photos.paginate({ is_deleted: false, is_private: true }, options);
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const getContributions = async (userId, options) => {
+  try {
+    return await Photos.paginate({ user: userId, is_published: true, is_deleted: false, is_private: false }, options);
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -234,4 +243,5 @@ module.exports = {
   getPrivatePhotos,
   publishDraft,
   replacePhoto,
+  getContributions,
 };

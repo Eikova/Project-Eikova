@@ -18,6 +18,10 @@ router
   .get(auth('fullPhotoAccess'), photoController.getPrivatePhotos)
 
 router
+  .route('/user-contributions/:userId')
+  .get(auth('managePhotos'), photoController.getContributions)
+
+router
   .route('/:id')
   .get(auth('download'), photoController.getPhoto)
   .patch(auth('managePhotos'), photoController.updatePhoto)

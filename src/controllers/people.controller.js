@@ -3,7 +3,7 @@ const catchAsync = require('../utils/catchAsync');
 const { PeopleService } = require('../services');
 
 const createPeople = catchAsync(async (req, res) => {
-  const people = await PeopleService.createPeople(req.body.people, req.user.id);
+  const people = await PeopleService.createPeople(req.body.name, req.user.id);
   res.status(httpStatus.CREATED).json({
     status: 'success',
     people,

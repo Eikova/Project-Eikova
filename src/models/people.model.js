@@ -7,7 +7,7 @@ const PeopleSchema = mongoose.Schema({
     required: true,
     trim: true,
     minlength: 4,
-    maxlength: 22,
+    maxlength: 40,
     unique: true,
   },
   author: {

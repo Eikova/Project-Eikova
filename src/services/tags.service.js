@@ -11,11 +11,12 @@ const getTags = async () => {
 };
 
 const createTag = async (tag, user) => {
-  const existingTag = await Tag.findOne({ tag });
+  const fmtTag = tag.toLowerCase();
+  const existingTag = await Tag.findOne({ tag: fmtTag });
   if (existingTag) {
     throw new ApiError(httpStatus.CONFLICT, 'Tag already exists');
   }
-  const data = {tag: tag.toLowerCase(), author: user};
+  const data = { tag: fmtTag, author: user };
   return await Tag.create(data);
 };
 

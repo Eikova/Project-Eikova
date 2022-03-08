@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const { toJSON, paginate } = require('./plugins');
 
-const TagsSchema = mongoose.Schema(
-  {
-  tag: {
+const PeopleSchema = mongoose.Schema({
+  name: {
     type: String,
     required: true,
     trim: true,
@@ -19,12 +18,12 @@ const TagsSchema = mongoose.Schema(
 });
 
 // add plugin that converts mongoose to json
-TagsSchema.plugin(toJSON);
-TagsSchema.plugin(paginate);
+PeopleSchema.plugin(toJSON);
+PeopleSchema.plugin(paginate);
 
 /**
- * @typedef Tags
+ * @typedef People
  */
-const Tag = mongoose.model('Tag', TagsSchema);
+const People = mongoose.model('People', PeopleSchema);
 
-module.exports = Tag;
+module.exports = People;

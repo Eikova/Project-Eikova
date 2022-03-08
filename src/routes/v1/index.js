@@ -4,6 +4,7 @@ const userRoute = require('./user.route');
 const docsRoute = require('./docs.route');
 const photoRoute = require('./photos.route');
 const tagRoute = require('./tags.route');
+const peopleRoute = require('./people.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -24,6 +25,10 @@ const defaultRoutes = [
   {
     path: '/tags',
     route: tagRoute,
+  },
+  {
+    path: '/people',
+    route: peopleRoute,
   },
 ];
 

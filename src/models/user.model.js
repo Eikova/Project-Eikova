@@ -50,6 +50,15 @@ const userSchema = mongoose.Schema(
   }
 );
 
+userSchema.virtual('photos', {
+  ref: 'Photos',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+userSchema.set('toObject', { virtuals: true });
+userSchema.set('toJSON', { virtuals: true });
+
 // add plugin that converts mongoose to json
 userSchema.plugin(toJSON);
 userSchema.plugin(paginate);

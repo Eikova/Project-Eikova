@@ -6,6 +6,7 @@ const userService = require('./user.service');
 const { Token } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
+const { ROLE } = require('../config/roles');
 
 /**
  * Generate token
@@ -24,6 +25,7 @@ const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
   };
   return jwt.sign(payload, secret);
 };
+
 
 /**
  * Save a token
@@ -45,6 +47,8 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
   return tokenDoc;
 };
 
+
+
 /**
  * Verify token and return token doc (or throw an error if it is not valid)
  * @param {string} token
@@ -59,6 +63,32 @@ const verifyToken = async (token, type) => {
   }
   return tokenDoc;
 };
+
+// const verifyUserToken = async (token, type) => {
+//   const payload = jwt.verify(token, config.jwt.secret);
+//   const tokenDoc = await Token.findOne({ token, type, user: payload.sub, blacklisted: false });
+//   if (!tokenDoc) {
+//     throw new Error('Token not found');
+//   }
+//   return tokenDoc;
+// };
+
+
+// const revokeUserInvitationTokens = async (user) => {
+//   await Token.deleteMany({ user: user.id, type: tokenTypes.USER_INVITATION });
+//   return true;
+// };
+
+const generateUserInvitationToken = async (user) => {
+    const expires = moment().add(config.jwt.userInvitationExpirationMinutes, 'minutes');
+    const userInvitationToken = generateToken(user.id, expires, tokenTypes.USER_INVITATION);
+    await saveToken(userInvitationToken, user.id, expires, tokenTypes.USER_INVITATION);
+    console.log(userInvitationToken,"UserIvitaionToken")
+    return {userInvitationToken};
+
+
+};
+
 
 /**
  * Generate auth tokens
@@ -113,6 +143,21 @@ const generateVerifyEmailToken = async (user) => {
   return verifyEmailToken;
 };
 
+const generateSignUpToken = async (user) => {
+  console.log(user)
+  const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+  const signUpToken = generateToken(user.id, expires, tokenTypes.ACCESS);
+  await saveToken(signUpToken, user.id, expires, tokenTypes.ACCESS);
+  return signUpToken;
+};
+
+const generateOneTimeToken = async (user) => {
+  const expires = moment().add(config.jwt.oneTimeTokenExpirationMinutes, 'minutes');
+  const oneTimeToken = generateToken(user.id, expires, tokenTypes.USER_ACCESS);
+  await saveToken(oneTimeToken, user.id, expires, tokenTypes.USER_ACCESS);
+  return oneTimeToken;
+};
+
 module.exports = {
   generateToken,
   saveToken,
@@ -120,4 +165,7 @@ module.exports = {
   generateAuthTokens,
   generateResetPasswordToken,
   generateVerifyEmailToken,
+  generateUserInvitationToken,
+  generateSignUpToken,
+  generateOneTimeToken
 };

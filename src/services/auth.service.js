@@ -1,9 +1,12 @@
 const httpStatus = require('http-status');
 const tokenService = require('./token.service');
 const userService = require('./user.service');
+const OTPService = require('./otp.service');
 const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
+const { ROLE } = require('../config/roles')
+
 
 /**
  * Login with username and password
@@ -12,18 +15,69 @@ const { tokenTypes } = require('../config/tokens');
  * @returns {Promise<User>}
  */
 const loginUserWithEmailAndPassword = async (email, password) => {
+
   const user = await userService.getUserByEmail(email);
+
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+  }
+  //ideally shouldnt get here in the first place, but just a check incase
+  if(user.role === ROLE.USER){
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Access Denied');
   }
   return user;
 };
 
+
+/**
+ * InviteUser
+ * @param {string} userCredentials
+ * @returns {Promise}
+ */
+
+
+//Correct saving to DB before mail
+const inviteUser = async(name,email,role)=>{
+    let user = await userService.getUserByEmail(email);
+    if(user){
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
+    }
+    
+       user = await userService.createUser({name,email,role})
+      const token = await tokenService.generateUserInvitationToken(user)
+
+      return { user, token}
+ 
+}
+
+/** 
+ * Verify Invite
+ * @param {string} token
+ * @returns {Promise}
+ */
+
+const verifyInvitation = async(token)=>{
+  console.log(token)
+  try{  
+  const verify = await tokenService.verifyToken(token,tokenTypes.USER_INVITATION)
+  let user = await userService.getUserById(verify.user)
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  await Token.deleteMany({ user: user.id, type: tokenTypes.USER_INVITATION });
+  return user
+}
+catch{
+  throw new ApiError(httpStatus.BAD_REQUEST, 'Email verification failed');
+}
+
+}
 /**
  * Logout
  * @param {string} refreshToken
  * @returns {Promise}
  */
+
 const logout = async (refreshToken) => {
   const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: tokenTypes.REFRESH, blacklisted: false });
   if (!refreshTokenDoc) {
@@ -76,17 +130,41 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
  * @param {string} verifyEmailToken
  * @returns {Promise}
  */
-const verifyEmail = async (verifyEmailToken) => {
+// const verifyEmail = async (verifyEmailToken) => {
+//   try {
+//     const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
+//     const user = await userService.getUserById(verifyEmailTokenDoc.user);
+//     if (!user) {
+//       throw new Error();
+//     }
+//     await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
+//     await userService.updateUserById(user.id, { isEmailVerified: true });
+//   } catch (error) {
+//     throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
+//   }
+// };
+
+/**
+ * Verify user signup
+ * @param {string} userSignUpToken
+ * @returns {Promise}
+ */
+ const verifyUserSignUp = async (userSignUpToken) => {
   try {
-    const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
-    const user = await userService.getUserById(verifyEmailTokenDoc.user);
+    const userSignUpTokenDoc = await tokenService.verifyToken(userSignUpToken, tokenTypes.ACCESS);
+    console.log(userSignUpTokenDoc)
+    const user = await userService.getUserById(userSignUpTokenDoc.user);
     if (!user) {
-      throw new Error();
+      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
     }
-    await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
-    await userService.updateUserById(user.id, { isEmailVerified: true });
+    // if (user.status === 'deactivated') {
+    //   throw new ApiError(httpStatus.UNAUTHORIZED, 'deactivated user');
+    // }
+    await Token.deleteMany({ user: user.id, type: tokenTypes.USER_SIGNUP });
+    await userService.updateUserById(user, { status: 'active' });
+    return user;
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'signup failed');
   }
 };
 
@@ -95,5 +173,7 @@ module.exports = {
   logout,
   refreshAuth,
   resetPassword,
-  verifyEmail,
+  inviteUser,
+  verifyInvitation,
+  verifyUserSignUp
 };

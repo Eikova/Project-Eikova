@@ -36,6 +36,7 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  */
 
 
+//Correct saving to DB before mail
 const inviteUser = async(name,email,role)=>{
     let user = await userService.getUserByEmail(email);
     if(user){
@@ -43,13 +44,13 @@ const inviteUser = async(name,email,role)=>{
     }
     
        user = await userService.createUser({name,email,role})
-      const token = await tokenService.generateUserInvitationToken(user1)
+      const token = await tokenService.generateUserInvitationToken(user)
 
       return { user, token}
  
 }
 
-/**
+/** 
  * Verify Invite
  * @param {string} token
  * @returns {Promise}

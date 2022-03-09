@@ -6,8 +6,8 @@ const auth = require('../../middlewares/auth');
 
 const router = express.Router();
 
-router.post('/invite', auth('invite'),validate(authValidation.invite), authController.invite);
-router.post('/complete-signup', auth('manageUser'),validate(authValidation.register), authController.completeSignup);
+router.post('/invite',validate(authValidation.invite), authController.invite);
+router.post('/complete-signup',validate(authValidation.register), authController.completeSignup);
 router.post('/verify-invite',validate(authValidation.verifyInvite), authController.verifyInvite);
 // router.post('/register', validate(authValidation.register), authController.register);
 router.post('/login', validate(authValidation.login), authController.login);
@@ -16,7 +16,7 @@ router.post('/logout', auth('manageUser'), validate(authValidation.logout), auth
 router.post('/forgot-password', validate(authValidation.forgotPassword), authController.forgotPassword);
 router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
 router.post('/user/login',  validate(authValidation.login), authController.userLogin);
-router.post('/user/send-otp', auth('inviteUser'),  validate(authValidation.invite), authController.inviteUser);
+router.post('/user/send-otp',  validate(authValidation.invite), authController.inviteUser);
 
 module.exports = router;
 

@@ -20,43 +20,10 @@ const allRoles = {
   superadmin: superAdminRoles,
 };
 
-// const allRoles = {
-//   user: userRoles,
-//   contributor: contributorRoles,
-//   admin: adminRoles,
-//   superadmin: superAdminRoles,
-// };
-const ROLE = {
-  USER: 'user',
-  CONTRIBUTOR: 'contributor',
-  ADMIN: 'admin',
-  SUPERADMIN: 'super-admin'
-}
-
-const roleRights = new Map();
-roleRights.set(ROLE.USER, ['manageUsers']);
-roleRights.set(ROLE.CONTRIBUTOR, [
-  'manageUsers',
-
-]);
-roleRights.set(ROLE.ADMIN, [
-  'invite',
-  'manageUsers',
-  'inviteUser'
-]);
-roleRights.set(ROLE.SUPERADMIN, [
-'invite',
-'manageUsers',
-'inviteUser'
-
-]);
-
-
-
-// const roles = Object.keys(allRoles);
-// const roleRights = new Map(Object.entries(allRoles));
+const roles = Object.keys(allRoles);
+const roleRights = new Map(Object.entries(allRoles));
 
 module.exports = {
-  ROLE,
+  roles,
   roleRights,
 };

@@ -16,10 +16,9 @@ const login = catchAsync(async (req, res) => {
   res.send({ user, tokens });
 });
 
-
 const inviteUser = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-  const otp = await otpService.generateOTP (email, password);
+  const { email } = req.body;
+  const otp = await otpService.generateOTP(email);
   await emailService.sendUserInviteEmail(email, otp.code);
   res.status(httpStatus.NO_CONTENT).send();
 });
@@ -27,23 +26,19 @@ const inviteUser = catchAsync(async (req, res) => {
 const userLogin = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const verify = await otpService.verifyOTP(email, password);
-  console.log(verify)
-  if(!verify){
+  if (!verify) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'invalid Email or Token');
   }
-  const getUser = await userService.getUserByEmail(email)
-  if(!getUser){
+  const getUser = await userService.getUserByEmail(email);
+  if (!getUser) {
     let user = await userService.createUser(req.body);
-    user = await userService.updateUserById(user.id, {status:'active'});
+    user = await userService.updateUserById(user.id, { status: 'active' });
     const tokens = await tokenService.generateOneTimeToken(user);
     res.send({ user, tokens });
-  }
-  else{
+  } else {
     const tokens = await tokenService.generateOneTimeToken(getUser);
-    res.send({ user:getUser, tokens });
+    res.send({ user: getUser, tokens });
   }
-
-
 });
 
 const logout = catchAsync(async (req, res) => {
@@ -67,19 +62,16 @@ const resetPassword = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
-
 const verifyInvite = catchAsync(async (req, res) => {
   const user = await authService.verifyInvitation(req.query.token);
-  console.log(user)
   const token = await tokenService.generateSignUpToken(user);
-  res.send({ user, token, redirectUrl: `http://frontend.com?token=${token}&email=${user.email}` });
+  res.send({ user, token, redirectUrl: `https://frontend.com?token=${token}&email=${user.email}` });
 });
-
 
 const invite = catchAsync(async (req, res) => {
   const { name, email, role } = req.body;
-  const user = await authService.inviteUser(name,email,role);
-  //if User is a user, send Code, else, send, email link
+  const user = await authService.inviteUser(name, email, role);
+  // if User is a user, send Code, else, send, email link
   await emailService.sendInviteEmail(email, user.token.userInvitationToken);
   res.status(httpStatus.NO_CONTENT).send();
 });
@@ -111,5 +103,5 @@ module.exports = {
   verifyInvite,
   completeSignup,
   userLogin,
-  inviteUser
+  inviteUser,
 };

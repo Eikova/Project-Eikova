@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
-const { ROLE } = require('../config/roles');
+const { roles } = require('../config/roles');
 
 const userSchema = mongoose.Schema(
   {
@@ -16,31 +16,20 @@ const userSchema = mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      // validate(value) {
-      //   if (!validator.isEmail(value)) {
-      //     throw new Error('Invalid email');
-      //   }
-      // },
     },
     password: {
       type: String,
       trim: true,
       minlength: 6,
-      // validate(value) {
-      //   if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-      //     throw new Error('Password must contain at least one letter and one number');
-      //   }
-      // },
       private: true, // used by the toJSON plugin
     },
     role: {
       type: String,
-      enum: Object.values(ROLE),
-      default: ROLE.USER,
+      enum: roles,
     },
     status: {
       type: String,
-      enum: ['active','disabled'],
+      enum: ['active', 'disabled'],
       default: 'disabled',
     },
     department: {

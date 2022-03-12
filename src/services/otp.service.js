@@ -16,7 +16,7 @@ const generateCode = () => {
 
 
 const updateOtpById = async (otpId, updateBody) => {
-  const otp = await Otp.findById(otpId)
+  const otp = await Otp.findById(otpId);
   if (!otp) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Otp not found');
   }
@@ -32,20 +32,20 @@ const generateOTP = async (email) => {
   const code = generateCode();
   const otp = await Otp.findOne({ email });
 
-  if (otp && otp.is_expired== true) {
-  await updateOtpById(otp.id,{code:code,is_expired: false})
+  if (otp && otp.is_expired === true) {
+    await updateOtpById(otp.id, { code, is_expired: false });
   }
 
-  // if there is an otp and its not expired, prompt that Otp has been sent already
-  else if (otp && otp.is_expired== false){
+  // if there is an otp, and it's not expired, prompt that Otp has been sent already
+  else if (otp && otp.is_expired === false) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Otp sent already');
   }
-  
+
   // after code has expired, delete from the database
   const createOtp = await Otp.create({
     email,
     code,
-  })
+  });
 
   return createOtp;
 };

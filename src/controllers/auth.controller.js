@@ -20,7 +20,7 @@ const inviteUser = catchAsync(async (req, res) => {
   const { email } = req.body;
   const otp = await otpService.generateOTP(email);
   await emailService.sendUserInviteEmail(email, otp.code);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.OK).send("Invite sent Successfully");
 });
 
 const userLogin = catchAsync(async (req, res) => {
@@ -70,10 +70,10 @@ const verifyInvite = catchAsync(async (req, res) => {
 
 const invite = catchAsync(async (req, res) => {
   const { name, email, role } = req.body;
-  const user = await authService.inviteUser(name, email, role);
-  // if User is a user, send Code, else, send, email link
+  //send Email before saving to DB
+  const user = await authService.inviteUser(name, email, role, req.user);
   await emailService.sendInviteEmail(email, user.token.userInvitationToken);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.OK).send("Invite sent Successfully");
 });
 
 const completeSignup = catchAsync(async (req, res) => {

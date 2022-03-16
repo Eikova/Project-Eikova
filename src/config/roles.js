@@ -5,7 +5,7 @@ const adminRoles = [
   'getUsers',
   'manageUsers',
   'manageContributors',
-  'manageMeetings',
+  'manageMeeting',
   'managePeople',
   'grantAccess',
   'revokeAccess',

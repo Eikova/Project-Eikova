@@ -4,3 +4,4 @@ module.exports.OTP = require('./otp.model');
 module.exports.Photos = require('./photos.model');
 module.exports.Tag = require('./tags.model');
 module.exports.People = require('./people.model');
+module.exports.Meeting = require('./meeting.model');

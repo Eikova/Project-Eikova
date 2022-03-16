@@ -5,7 +5,7 @@ const OTPService = require('./otp.service');
 const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
-const { ROLE } = require('../config/roles')
+const { ROLE, roleRights } = require('../config/roles')
 
 
 /**
@@ -22,7 +22,7 @@ const loginUserWithEmailAndPassword = async (email, password) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
   //ideally shouldnt get here in the first place, but just a check incase
-  if(user.role === ROLE.USER){
+  if(user.role === 'user'){
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Access Denied');
   }
   return user;
@@ -37,7 +37,10 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 
 
 //Correct saving to DB before mail
-const inviteUser = async(name,email,role)=>{
+const inviteUser = async(name,email,role,author)=>{
+  if(author.role === 'admin' && (role=== 'super-admin' || role === 'admin' )){
+    throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed to perform this action');
+  }
     let user = await userService.getUserByEmail(email);
     if(user){
       throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');

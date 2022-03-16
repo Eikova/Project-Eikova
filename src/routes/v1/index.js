@@ -5,6 +5,7 @@ const docsRoute = require('./docs.route');
 const photoRoute = require('./photos.route');
 const tagRoute = require('./tags.route');
 const peopleRoute = require('./people.route');
+const meetingRoute = require('./meeting.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -29,6 +30,10 @@ const defaultRoutes = [
   {
     path: '/people',
     route: peopleRoute,
+  },
+  {
+    path: '/meeting',
+    route: meetingRoute,
   },
 ];
 

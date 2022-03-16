@@ -6,7 +6,7 @@ const { roles } = require('../config/roles');
 
 const userSchema = mongoose.Schema(
   {
-    name: {
+    username: {
       type: String,
       trim: true,
     },
@@ -29,7 +29,7 @@ const userSchema = mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'disabled'],
+      enum: ['enabled', 'disabled'],
       default: 'disabled',
     },
     department: {

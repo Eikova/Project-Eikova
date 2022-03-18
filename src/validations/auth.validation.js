@@ -21,7 +21,7 @@ const login = {
 
 const invite = {
   body: Joi.object().keys({
-    name:  Joi.string().required(),
+    username:  Joi.string().required(),
     email: Joi.string().required(),
     role: Joi.string().required(),
 
@@ -30,7 +30,7 @@ const invite = {
 
 const invite2 = {
   body: Joi.object().keys({
-    name:  Joi.string().required(),
+    username:  Joi.string().required(),
     email: Joi.string().required(),
     role: Joi.string().required(),
 

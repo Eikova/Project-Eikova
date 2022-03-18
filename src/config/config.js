@@ -8,6 +8,9 @@ const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     PORT: Joi.number().default(3000),
+    USE_PORT: Joi.bool().default(false).description('This is to determine whether to use the PORT value'),
+    ENFORCE_SSL: Joi.bool().default(false).description('This is to determine whether to use HTTP or HTTPS'),
+    API_DOMAIN: Joi.string().description('API Domain'),
     MONGODB_URL: Joi.string().required().description('Mongo DB url'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
@@ -42,6 +45,7 @@ DB_URL = DB_URL.replace('<database>', process.env.MONGODB_DATABASE);
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  baseApiUrl: `${envVars.ENFORCE_SSL ? 'https' : 'http'}://${envVars.API_DOMAIN}:${envVars.USE_PORT ? envVars.PORT : ''}`,
   mongoose: {
     url: DB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
     options: {

@@ -8,6 +8,7 @@ const ExifReader = require('exifreader');
 const unlinkAsync = promisify(fs.unlink);
 const { Photos } = require('../models');
 const ApiError = require('../utils/ApiError');
+const { addToSearchIndex } = require('../middlewares/elasticsearch');
 
 const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION,
@@ -143,6 +144,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
     if (!isDraft) {
       photoData.is_published = true;
     }
+    const index = await addToSearchIndex(photoData);
     return await Photos.create({ ...photoData });
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);

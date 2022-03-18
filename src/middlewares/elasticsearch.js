@@ -6,59 +6,6 @@ const host = process.env.ELASTICSEARCH_HOST || 'http://localhost:9200';
 const index = process.env.ELASTICSEARCH_INDEX || 'eikova';
 const client = new Client({ node: host });
 
-const startSearchEngine = async () => {
-  try {
-    await client.ping({
-      requestTimeout: 3000,
-    });
-    logger.info('Connected to Elasticsearch');
-  } catch (error) {
-    logger.error(`Elasticsearch error: ${error}`);
-  }
-};
-
-const createIndex = async () => {
-  const body = {
-    settings: {
-      number_of_shards: 1,
-      number_of_replicas: 0,
-    },
-    mappings: {
-      _doc: {
-        properties: {
-          id: { type: 'keyword' },
-          url: { type: 'text' },
-          thumbnail: { type: 'text' },
-          title: { type: 'text' },
-          description: { type: 'text' },
-          tags: { type: 'text' },
-          metadata: { type: 'object' },
-          is_published: { type: 'boolean' },
-          is_private: { type: 'boolean' },
-          is_deleted: { type: 'boolean' },
-          downloads: { type: 'long' },
-          year: { type: 'text' },
-          month: { type: 'text' },
-          meeting_id: { type: 'text' },
-          user: { type: 'text' },
-          createdAt: { type: 'date' },
-          updatedAt: { type: 'date' },
-        },
-      },
-    },
-  };
-  try {
-    await client.indices.create({ index, body });
-    logger.info(`Index ${index} created`);
-  } catch (err) {
-    if (err.status === 400) {
-      logger.info('index already exists');
-    } else {
-      logger.error(err);
-    }
-  }
-};
-
 const populateIndex = async () => {
   try {
     const photos = await photoService.getPhotos();
@@ -66,16 +13,63 @@ const populateIndex = async () => {
       index,
       body: photos,
     });
-    logger.info('Index populated');
+    logger.info(`Index (${index}) populated!`);
   } catch (err) {
     logger.error(err);
+  }
+};
+
+const createIndex = async () => {
+  const body = {
+    mappings: {
+      properties: {
+        id: { type: 'keyword' },
+        url: { type: 'text' },
+        thumbnail: { type: 'text' },
+        title: { type: 'text' },
+        description: { type: 'text' },
+        tags: { type: 'text' },
+        metadata: { type: 'object' },
+        is_published: { type: 'boolean' },
+        is_private: { type: 'boolean' },
+        is_deleted: { type: 'boolean' },
+        downloads: { type: 'long' },
+        year: { type: 'text' },
+        month: { type: 'text' },
+        meeting_id: { type: 'text' },
+        user: { type: 'text' },
+        createdAt: { type: 'date' },
+        updatedAt: { type: 'date' },
+      },
+    },
+  };
+  try {
+    await client.indices.create({ index, body });
+    logger.info(`Index ${index} created`);
+    await populateIndex();
+  } catch (err) {
+    if (err.statusCode === 400) {
+      logger.info(`index (${index}) already exists!`);
+    } else {
+      logger.error(err);
+    }
+  }
+};
+
+const startSearchEngine = async () => {
+  const server = await client.ping();
+  if (server) {
+    logger.info('Search engine started');
+    await createIndex();
+  } else {
+    logger.error('Search engine failed to start');
   }
 };
 
 const deleteIndex = async () => {
   try {
     await client.indices.delete({ index });
-    logger.info(`Index ${index} deleted`);
+    logger.info(`Index ${index} deleted!`);
   } catch (err) {
     logger.error(err);
   }
@@ -87,7 +81,7 @@ const addToSearchIndex = async (photo) => {
       index,
       body: photo,
     });
-    logger.info('Added to search index successfully');
+    logger.info('Added to search index successfully!');
   } catch (err) {
     logger.error(err);
   }
@@ -102,7 +96,7 @@ const updateSearchIndex = async (photo) => {
         doc: photo,
       },
     });
-    logger.info('Updated search index successfully');
+    logger.info('Updated search index successfully!');
   } catch (err) {
     logger.error(err);
   }
@@ -114,7 +108,7 @@ const deleteFromSearchIndex = async (photo) => {
       index,
       id: photo.id,
     });
-    logger.info('Deleted from search index successfully');
+    logger.info('Deleted from search index successfully!');
   } catch (err) {
     logger.error(err);
   }

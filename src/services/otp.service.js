@@ -1,7 +1,5 @@
 const httpStatus = require('http-status');
-const  moment  = require('moment');
-const { Otp } = require('../models');
-// const { findById } = require('../models/token.model');
+const { OTP } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 
@@ -12,11 +10,12 @@ const generateCode = () => {
     code += Math.floor(Math.random() * 10);
   }
   return code;
+  
 };
 
 
 const updateOtpById = async (otpId, updateBody) => {
-  const otp = await Otp.findById(otpId);
+  const otp = await OTP.findById(otpId);
   if (!otp) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Otp not found');
   }
@@ -30,7 +29,7 @@ const updateOtpById = async (otpId, updateBody) => {
 
 const generateOTP = async (email) => {
   const code = generateCode();
-  const otp = await Otp.findOne({ email });
+  const otp = await OTP.findOne({ email });
 
   if (otp && otp.is_expired === true) {
     await updateOtpById(otp.id, { code, is_expired: false });
@@ -42,7 +41,7 @@ const generateOTP = async (email) => {
   }
 
   // after code has expired, delete from the database
-  const createOtp = await Otp.create({
+  const createOtp = await OTP.create({
     email,
     code,
   });
@@ -51,7 +50,7 @@ const generateOTP = async (email) => {
 };
 
 const verifyOTP = async (email, code) => {
-  const otp = await Otp.findOne({ email, code });
+  const otp = await OTP.findOne({ email, code });
   if (!otp) {
     return false;
   }

@@ -5,7 +5,7 @@ const register = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
-    name: Joi.string(),
+    username: Joi.string(),
     position: Joi.string(),
     department: Joi.string(),
     token: Joi.string()

@@ -1,11 +1,9 @@
 const httpStatus = require('http-status');
 const tokenService = require('./token.service');
 const userService = require('./user.service');
-const OTPService = require('./otp.service');
 const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
-const { ROLE, roleRights } = require('../config/roles')
 
 
 /**
@@ -41,6 +39,12 @@ const inviteUser = async(name,email,role,author)=>{
   if(author.role === 'admin' && (role=== 'super-admin' || role === 'admin' )){
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed to perform this action');
   }
+
+  if(role=='user'){
+    throw new ApiError(httpStatus.BAD_REQUEST, 'You are not permitted to invite a user here');
+
+  }
+  
     let user = await userService.getUserByEmail(email);
     if(user){
       throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
@@ -155,7 +159,6 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
  const verifyUserSignUp = async (userSignUpToken) => {
   try {
     const userSignUpTokenDoc = await tokenService.verifyToken(userSignUpToken, tokenTypes.ACCESS);
-    console.log(userSignUpTokenDoc)
     const user = await userService.getUserById(userSignUpTokenDoc.user);
     if (!user) {
       throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
@@ -164,7 +167,7 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
     //   throw new ApiError(httpStatus.UNAUTHORIZED, 'deactivated user');
     // }
     await Token.deleteMany({ user: user.id, type: tokenTypes.USER_SIGNUP });
-    await userService.updateUserById(user, { status: 'active' });
+    await userService.updateUserById(user, { status: 'enabled' });
     return user;
   } catch (error) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'signup failed');

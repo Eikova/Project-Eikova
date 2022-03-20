@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService, emailService, otpService } = require('../services');
+const { authService, userService, tokenService, emailService, OTPService } = require('../services');
 const ApiError = require('../utils/ApiError');
 
 const register = catchAsync(async (req, res) => {
@@ -18,23 +18,24 @@ const login = catchAsync(async (req, res) => {
 
 const inviteUser = catchAsync(async (req, res) => {
   const { email } = req.body;
-  const otp = await otpService.generateOTP(email);
+  const otp = await OTPService.generateOTP(email);
+  console.log(otp)
   await emailService.sendUserInviteEmail(email, otp.code);
   res.status(httpStatus.OK).send("Invite sent Successfully");
 });
 
 const userLogin = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const verify = await otpService.verifyOTP(email, password);
+  const verify = await OTPService.verifyOTP(email, password);
   if (!verify) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'invalid Email or Token');
   }
   const getUser = await userService.getUserByEmail(email);
   if (!getUser) {
     let user = await userService.createUser(req.body);
-    user = await userService.updateUserById(user.id, { status: 'active' });
-    const tokens = await tokenService.generateOneTimeToken(user);
-    res.send({ user, tokens });
+    user = await userService.updateUserById(user.id, { status: 'enabled' });
+    const token = await tokenService.generateOneTimeToken(user);
+    res.send({ user, token });
   } else {
     const tokens = await tokenService.generateOneTimeToken(getUser);
     res.send({ user: getUser, tokens });
@@ -59,7 +60,7 @@ const forgotPassword = catchAsync(async (req, res) => {
 
 const resetPassword = catchAsync(async (req, res) => {
   await authService.resetPassword(req.query.token, req.body.password);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.OK).send("password reset successfully");
 });
 
 const verifyInvite = catchAsync(async (req, res) => {

@@ -145,6 +145,25 @@ const getFromIndexByPhotoId = async (photoId) => {
   }
 };
 
+const searchIndex = async (query) => {
+  try {
+    const { body } = await client.search({
+      index,
+      body: {
+        query: {
+          multi_match: {
+            query,
+            fields: ['title', 'description', 'tags', 'year', 'month', 'meeting_id'],
+          },
+        },
+      },
+    });
+    return body;
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
 module.exports = {
   createIndex,
   startSearchEngine,
@@ -155,4 +174,5 @@ module.exports = {
   deleteFromSearchIndex,
   getFromIndexById,
   getFromIndexByPhotoId,
+  searchIndex,
 };

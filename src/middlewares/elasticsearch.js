@@ -87,11 +87,11 @@ const addToSearchIndex = async (photo) => {
   }
 };
 
-const updateSearchIndex = async (photo) => {
+const updateSearchIndex = async (id, photo) => {
   try {
     await client.update({
       index,
-      id: photo.id,
+      id,
       body: {
         doc: photo,
       },
@@ -102,11 +102,12 @@ const updateSearchIndex = async (photo) => {
   }
 };
 
-const deleteFromSearchIndex = async (photo) => {
+const deleteFromSearchIndex = async (id) => {
   try {
+    const doc = await getFromIndexByPhotoId(id);
     await client.delete({
       index,
-      id: photo.id,
+      id: doc._id,
     });
     logger.info('Deleted from search index successfully!');
   } catch (err) {
@@ -114,11 +115,29 @@ const deleteFromSearchIndex = async (photo) => {
   }
 };
 
-const getFromSearchIndex = async (id) => {
+const getFromIndexById = async (id) => {
   try {
     const { body } = await client.get({
       index,
       id,
+    });
+    return body;
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
+const getFromIndexByPhotoId = async (photoId) => {
+  try {
+    const { body } = await client.search({
+      index,
+      body: {
+        query: {
+          match: {
+            id: photoId,
+          },
+        },
+      },
     });
     return body;
   } catch (err) {
@@ -134,5 +153,6 @@ module.exports = {
   addToSearchIndex,
   updateSearchIndex,
   deleteFromSearchIndex,
-  getFromSearchIndex,
+  getFromIndexById,
+  getFromIndexByPhotoId,
 };

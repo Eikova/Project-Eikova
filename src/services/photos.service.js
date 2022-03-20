@@ -8,7 +8,7 @@ const ExifReader = require('exifreader');
 const unlinkAsync = promisify(fs.unlink);
 const { Photos } = require('../models');
 const ApiError = require('../utils/ApiError');
-const { addToSearchIndex } = require('../middlewares/elasticsearch');
+const { addToSearchIndex, updateSearchIndex, deleteFromSearchIndex } = require('../middlewares/elasticsearch');
 
 const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION,
@@ -99,7 +99,9 @@ const replacePhoto = async (id, file) => {
       thumbnail: newThumbnail.Location,
       metadata: meta,
     };
-    return await Photos.findByIdAndUpdate(id, newPhotoDetails);
+    const update = await Photos.findByIdAndUpdate(id, newPhotoDetails);
+    await updateSearchIndex(id, newPhotoDetails);
+    return update;
   } catch (err) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err);
   }
@@ -144,8 +146,9 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
     if (!isDraft) {
       photoData.is_published = true;
     }
-    const index = await addToSearchIndex(photoData);
-    return await Photos.create({ ...photoData });
+    const data = await Photos.create({ ...photoData });
+    const index = await addToSearchIndex(data);
+    return data;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -195,7 +198,10 @@ const togglePhotoPrivacy = async (id) => {
   try {
     const photo = await getPhoto(id);
     const privacy = photo.is_private;
-    return await Photos.findByIdAndUpdate(id, { is_private: !privacy, modified_at: Date.now() }, { new: true });
+    const data = { is_private: !privacy, modified_at: Date.now() };
+    const update = await Photos.findByIdAndUpdate(id, data, { new: true });
+    await updateSearchIndex(id, data);
+    return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -203,7 +209,10 @@ const togglePhotoPrivacy = async (id) => {
 
 const deletePhoto = async (id) => {
   try {
-    return await Photos.findByIdAndUpdate(id, { is_deleted: true, modified_at: Date.now() }, { new: true });
+    const data = { is_deleted: true, modified_at: Date.now() };
+    const update = await Photos.findByIdAndUpdate(id, data, { new: true });
+    await updateSearchIndex(id, data);
+    return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -220,7 +229,11 @@ const updatePhoto = async (id, obj) => {
     data.year = obj.year ? obj.year : photo.year;
     data.month = obj.month ? obj.month : photo.month;
     data.meeting_id = obj.meeting_id ? obj.meeting_id : photo.meeting_id;
-    return await Photos.findByIdAndUpdate(id, { ...data, modified_at: Date.now() }, { new: true });
+
+    const updateDetails = { ...data, modified_at: Date.now() };
+    const update = await Photos.findByIdAndUpdate(id, updateDetails, { new: true });
+    await updateSearchIndex(id, updateDetails);
+    return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -228,7 +241,10 @@ const updatePhoto = async (id, obj) => {
 
 const publishDraft = async (id) => {
   try {
-    return await Photos.findByIdAndUpdate(id, { is_published: true, modified_at: Date.now() }, { new: true });
+    const data = { is_published: true, modified_at: Date.now() };
+    const update = await Photos.findByIdAndUpdate(id, data, { new: true });
+    await updateSearchIndex(id, data);
+    return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }

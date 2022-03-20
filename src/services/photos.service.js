@@ -8,7 +8,7 @@ const ExifReader = require('exifreader');
 const unlinkAsync = promisify(fs.unlink);
 const { Photos } = require('../models');
 const ApiError = require('../utils/ApiError');
-const { addToSearchIndex, updateSearchIndex, deleteFromSearchIndex } = require('../middlewares/elasticsearch');
+const { addToSearchIndex, updateSearchIndex, searchIndex } = require('../middlewares/elasticsearch');
 
 const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION,
@@ -250,6 +250,14 @@ const publishDraft = async (id) => {
   }
 };
 
+const searchPhotos = async (query) => {
+  try {
+    return await searchIndex(query);
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
 module.exports = {
   uploadPhoto,
   getPhotos,
@@ -262,4 +270,5 @@ module.exports = {
   publishDraft,
   replacePhoto,
   getContributions,
+  searchPhotos,
 };

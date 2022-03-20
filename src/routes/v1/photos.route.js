@@ -51,5 +51,9 @@ router
   .route('/:id/toggle-privacy')
   .patch(auth('fullPhotoAccess'), photoController.togglePhotoPrivacy)
 
+router
+  .route('/search')
+  .get(auth('download'), photoController.searchPhotos)
+
 
 module.exports = router;

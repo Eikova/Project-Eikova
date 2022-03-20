@@ -163,6 +163,21 @@ const publishDraft = catchAsync(async (req, res) => {
   });
 });
 
+const searchPhotos = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (req.query.sortBy === 'oldest') {
+    options.sortBy = 'asc';
+  } else {
+    options.sortBy = 'desc';
+  }
+  const photos = await PhotoService.searchPhotos(req.params.query);
+  res.status(httpStatus.OK).json({
+    status: httpStatus.OK,
+    message: 'Photos fetched successfully',
+    photos,
+  });
+});
+
 module.exports = {
   createPhoto,
   createDraft,
@@ -176,4 +191,5 @@ module.exports = {
   publishDraft,
   replacePhoto,
   getContributions,
+  searchPhotos,
 };

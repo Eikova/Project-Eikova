@@ -45,10 +45,10 @@ const inviteUser = async(name,email,role,author)=>{
 
   }
   
-    let user = await userService.getUserByEmail(email);
-    if(user){
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
-    }
+    // let user = await userService.getUserByEmail(email);
+    // if(user){
+    //   throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
+    // }
     
        user = await userService.createUser({name,email,role})
       const token = await tokenService.generateUserInvitationToken(user)

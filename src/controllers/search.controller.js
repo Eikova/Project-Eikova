@@ -13,7 +13,7 @@ const searchPhotos = catchAsync(async (req, res) => {
   } else {
     options.sortBy = 'desc';
   }
-  const photos = await PhotoService.searchPhotos(req.params.query);
+  const photos = await PhotoService.searchPhotos(req.query.query, options);
   res.status(httpStatus.OK).json({
     status: httpStatus.OK,
     message: 'Photos fetched successfully',

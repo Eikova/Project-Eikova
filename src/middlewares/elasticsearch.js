@@ -145,20 +145,36 @@ const getFromIndexByPhotoId = async (photoId) => {
   }
 };
 
-const searchIndex = async (query) => {
+const searchIndex = async (phrase, options) => {
   try {
-    const { body } = await client.search({
+    return await client.search({
       index,
       body: {
         query: {
-          multi_match: {
-            query,
-            fields: ['title', 'description', 'tags', 'year', 'month', 'meeting_id'],
+          bool: {
+            should: [
+              {
+                term: {
+                  is_private: false,
+                },
+              },
+              {
+                term: {
+                  is_published: true,
+                },
+              },
+              {
+                multi_match: {
+                  query: phrase,
+                  fields: ['title^3', 'description', 'tags^2', 'year', 'month', 'meeting_id'],
+                },
+              },
+            ],
+            minimum_should_match: 2,
           },
         },
       },
     });
-    return body;
   } catch (err) {
     logger.error(err);
   }

@@ -250,9 +250,9 @@ const publishDraft = async (id) => {
   }
 };
 
-const searchPhotos = async (query) => {
+const searchPhotos = async (query, options) => {
   try {
-    return await searchIndex(query);
+    return await searchIndex(query, options);
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }

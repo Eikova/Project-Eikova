@@ -64,7 +64,7 @@ const inviteUser = async(name,email,role,author)=>{
  */
 
 const verifyInvitation = async(token)=>{
-  console.log(token)
+
   try{  
   const verify = await tokenService.verifyToken(token,tokenTypes.USER_INVITATION)
   let user = await userService.getUserById(verify.user)

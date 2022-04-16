@@ -144,7 +144,6 @@ const generateVerifyEmailToken = async (user) => {
 };
 
 const generateSignUpToken = async (user) => {
-  console.log(user)
   const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
   const signUpToken = generateToken(user.id, expires, tokenTypes.ACCESS);
   await saveToken(signUpToken, user.id, expires, tokenTypes.ACCESS);

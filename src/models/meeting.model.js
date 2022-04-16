@@ -14,7 +14,7 @@ const MeetingSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-  },
+  }, 
 });
 
 // add plugin that converts mongoose to json

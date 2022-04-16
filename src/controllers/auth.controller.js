@@ -19,6 +19,11 @@ const login = catchAsync(async (req, res) => {
 const inviteUser = catchAsync(async (req, res) => {
   const { email, username } = req.body;
   const otp = await OTPService.generateOTP(email);
+  const user = await userService.getUserByEmail(email)
+  if(!user){
+    await userService.createUser({email,username,role:'user'});
+  }
+  
   console.log(otp)
   await emailService.sendUserInviteEmail(email, otp.code , username);
   res.status(httpStatus.OK).send("Invite sent Successfully");
@@ -32,14 +37,13 @@ const userLogin = catchAsync(async (req, res) => {
   }
   
   const getUser = await userService.getUserByEmail(email);
-  if (!getUser) {
-    let user = await userService.createUser(req.body);
-    user = await userService.updateUserById(user.id, { status: 'enabled' });
-    const token = await tokenService.generateOneTimeToken(user);
-    res.send({ user, token });
-  } else {
+   if(getUser) {
+    const user = await userService.updateUserById(getUser.id, { status: 'enabled' });
     const tokens = await tokenService.generateOneTimeToken(getUser);
-    res.send({ user: getUser, tokens });
+    res.send({ user , tokens });
+  }
+  else{
+    throw new ApiError(httpStatus.BAD_REQUEST, 'invalid credentials');
   }
 });
 

@@ -22,7 +22,7 @@ const generateToken = (userId, username, email, role,expires, type, secret = con
     name: username,
      email,
     role,
-     userId,
+     sub: userId,
     iat: moment().unix(),
     exp: expires.unix(),
     type,

@@ -156,8 +156,8 @@ const generateSignUpToken = async (user) => {
 
 const generateOneTimeToken = async (user) => {
   const expires = moment().add(config.jwt.oneTimeTokenExpirationMinutes, 'minutes');
-  const oneTimeToken = generateToken(user.id, user.username, user.email, user.role, expires, tokenTypes.USER_ACCESS);
-  await saveToken(oneTimeToken, user.id, expires, tokenTypes.USER_ACCESS);
+  const oneTimeToken = generateToken(user.id, user.username, user.email, user.role, expires, tokenTypes.ACCESS);
+  await saveToken(oneTimeToken, user.id, expires, tokenTypes.ACCESS);
   return oneTimeToken;
 };
 

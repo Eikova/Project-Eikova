@@ -1,6 +1,8 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const { tokenTypes } = require('../config/tokens');
+const Token = require('../models/token.model');
 
 /**
  * Create a user
@@ -79,6 +81,29 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+
+
+const toggleStatus = async (userId) => {
+  let updateBody;
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if(user.status === "enabled"){
+    updateBody = { status: "disabled"}
+    await Token.deleteMany({ user: user.id, type: tokenTypes.ACCESS});
+  }
+
+  else {
+    updateBody = { status: "enabled"}
+  }
+  Object.assign(user, updateBody);
+  await user.save();
+  return user;
+};
+
+
 module.exports = {
   createUser,
   queryUsers,
@@ -86,4 +111,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  toggleStatus
 };

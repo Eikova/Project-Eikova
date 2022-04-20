@@ -36,10 +36,21 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+
+const toggleStatus = catchAsync(async (req, res) => {
+  const user = await userService.toggleStatus(req.params.userId)
+
+  res.send(user)
+});
+
+
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
   updateUser,
   deleteUser,
+  toggleStatus
+
 };

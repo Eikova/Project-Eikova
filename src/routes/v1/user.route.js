@@ -20,6 +20,9 @@ router
 
 router.route('/send-otp').post(otpController.sendOTP);
 router.route('/verify-otp').post(otpController.verifyOTP);
+router
+  .route('/:userId/status')
+  .patch(auth('toggleStatus'), validate(userValidation.toggleStatus), userController.toggleStatus)
 
 module.exports = router;
 

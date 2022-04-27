@@ -166,7 +166,7 @@ const searchIndex = async (phrase, options) => {
               {
                 multi_match: {
                   query: phrase,
-                  fields: ['title^3', 'description', 'tags^2', 'year', 'month', 'meeting_id'],
+                  fields: ['title^3', 'description', 'tags^2', 'year', 'month', 'meeting_id'], // add people_id
                 },
               },
             ],

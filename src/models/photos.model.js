@@ -46,7 +46,12 @@ const PhotoSchema = mongoose.Schema(
       required: [true, 'A month must be provided'],
     },
     meeting_id: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Meeting',
+    },
+    people_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'People',
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

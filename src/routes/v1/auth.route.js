@@ -15,7 +15,7 @@ router.post('/logout', validate(authValidation.logout), authController.logout);
 // router.post('/refresh-tokens', validate(authValidation.refreshTokens), authController.refreshTokens);
 router.post('/forgot-password', validate(authValidation.forgotPassword), authController.forgotPassword);
 router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
-router.post('/user/login', validate(authValidation.login), authController.userLogin);
+// router.post('/user/login', validate(authValidation.login), authController.userLogin);
 router.post('/user/invite',auth('manageUsers'), validate(authValidation.invite), authController.inviteUser);
 
 module.exports = router;

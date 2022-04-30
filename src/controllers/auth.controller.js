@@ -9,41 +9,42 @@ const register = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send({ user, tokens });
 });
 
-const login = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await authService.loginUserWithEmailAndPassword(email, password);
-  const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens });
-});
-
 const inviteUser = catchAsync(async (req, res) => {
   const { email, username } = req.body;
   const otp = await OTPService.generateOTP(email);
-  const user = await userService.getUserByEmail(email)
-  if(!user){
-    await userService.createUser({email,username,role:'user'});
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    await userService.createUser({ email, username, role: 'user' });
   }
-  
-  console.log(otp)
-  await emailService.sendUserInviteEmail(email, otp.code , username);
-  res.status(httpStatus.OK).send("Invite sent Successfully");
+
+  console.log(otp);
+  await emailService.sendUserInviteEmail(email, otp.code, username);
+  res.status(httpStatus.OK).send('Invite sent Successfully');
 });
 
-const userLogin = catchAsync(async (req, res) => {
+const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const verify = await OTPService.verifyOTP(email, password);
-  if (!verify) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'invalid Email or Token');
-  }
-  
-  const getUser = await userService.getUserByEmail(email);
-   if(getUser) {
-    const user = await userService.updateUserById(getUser.id, { status: 'enabled' });
-    const tokens = await tokenService.generateOneTimeToken(getUser);
-    res.send({ user , tokens });
-  }
-  else{
-    throw new ApiError(httpStatus.BAD_REQUEST, 'invalid credentials');
+  //ensure other users can login with this route too
+  const user = await userService.getUserByEmail(email);
+  if (user.role !== 'user') {
+    const user = await authService.loginUserWithEmailAndPassword(email, password);
+    const tokens = await tokenService.generateAuthTokens(user);
+    res.send({ user, tokens });
+  } else {
+    const verify = await OTPService.verifyOTP(email, password);
+
+    if (!verify) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'invalid Email or Token');
+    }
+
+    const getUser = await userService.getUserByEmail(email);
+    if (getUser) {
+      const user = await userService.updateUserById(getUser.id, { status: 'enabled' });
+      const tokens = await tokenService.generateOneTimeToken(getUser);
+      res.send({ user, tokens });
+    } else {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'invalid credentials');
+    }
   }
 });
 
@@ -65,7 +66,7 @@ const forgotPassword = catchAsync(async (req, res) => {
 
 const resetPassword = catchAsync(async (req, res) => {
   await authService.resetPassword(req.query.token, req.body.password);
-  res.status(httpStatus.OK).send("password reset successfully");
+  res.status(httpStatus.OK).send('password reset successfully');
 });
 
 const verifyInvite = catchAsync(async (req, res) => {
@@ -77,13 +78,13 @@ const verifyInvite = catchAsync(async (req, res) => {
 const invite = catchAsync(async (req, res) => {
   const { name, email, role } = req.body;
   //send Email before saving to DB
-  let user = await userService.getUserByEmail(email)
-  if(user){
+  let user = await userService.getUserByEmail(email);
+  if (user) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'User already Exists');
   }
-   user = await authService.inviteUser(name, email, role, req.user);
+  user = await authService.inviteUser(name, email, role, req.user);
   await emailService.sendInviteEmail(email, user.token.userInvitationToken, name);
-  res.status(httpStatus.OK).send("Invite sent Successfully");
+  res.status(httpStatus.OK).send('Invite sent Successfully');
 });
 
 const completeSignup = catchAsync(async (req, res) => {
@@ -112,6 +113,5 @@ module.exports = {
   invite,
   verifyInvite,
   completeSignup,
-  userLogin,
   inviteUser,
 };

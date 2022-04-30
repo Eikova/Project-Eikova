@@ -8,7 +8,6 @@ const upload = multer({ dest: 'uploads/' });
 
 const router = express.Router();
 
-
 router
   .route('/')
   .get(auth('download'), photoController.getPhotos)

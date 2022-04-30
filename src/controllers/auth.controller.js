@@ -76,14 +76,15 @@ const verifyInvite = catchAsync(async (req, res) => {
 });
 
 const invite = catchAsync(async (req, res) => {
-  const { name, email, role } = req.body;
+  const { username, email, role } = req.body;
   //send Email before saving to DB
   let user = await userService.getUserByEmail(email);
+ 
   if (user) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'User already Exists');
   }
-  user = await authService.inviteUser(name, email, role, req.user);
-  await emailService.sendInviteEmail(email, user.token.userInvitationToken, name);
+  user = await authService.inviteUser(username, email, role, req.user);
+  await emailService.sendInviteEmail(email, user.token.userInvitationToken, username);
   res.status(httpStatus.OK).send('Invite sent Successfully');
 });
 

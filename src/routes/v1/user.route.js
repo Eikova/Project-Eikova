@@ -12,6 +12,10 @@ router
   .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
   .get( validate(userValidation.getUsers), userController.getUsers);
 
+  router
+  .route('/delete/:userId')
+  .patch(auth('deleteUser'), validate(userValidation.deleteUser), userController.deleteUser)
+  // .patch( validate(userValidation.deleteUser), userController.deleteUser);
 router
   .route('/:userId')
   .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
@@ -23,6 +27,12 @@ router.route('/verify-otp').post(otpController.verifyOTP);
 router
   .route('/:userId/status')
   .patch(auth('toggleStatus'), validate(userValidation.toggleStatus), userController.toggleStatus)
+
+
+
+// router
+//   .route('delete/:userId/del')
+//   .patch(auth('deleteUser'), validate(userValidation.deleteUser), userController.deleteUser)
 
 module.exports = router;
 

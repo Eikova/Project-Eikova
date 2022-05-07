@@ -82,6 +82,18 @@ const verifyToken = async (token, type) => {
 //   await Token.deleteMany({ user: user.id, type: tokenTypes.USER_INVITATION });
 //   return true;
 // };
+const updateTokenById = async (tokenId, updateBody) => {
+  const token = await Token.findById(tokenId);
+  if (!token) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Token not found');
+  }
+  // if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  // }
+  Object.assign(token, updateBody);
+  await token.save();
+  return token;
+};
 
 const generateUserInvitationToken = async (user) => {
     const expires = moment().add(config.jwt.userInvitationExpirationMinutes, 'minutes');
@@ -170,5 +182,6 @@ module.exports = {
   generateVerifyEmailToken,
   generateUserInvitationToken,
   generateSignUpToken,
-  generateOneTimeToken
+  generateOneTimeToken,
+  updateTokenById
 };

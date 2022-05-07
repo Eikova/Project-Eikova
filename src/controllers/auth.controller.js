@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, emailService, OTPService } = require('../services');
 const ApiError = require('../utils/ApiError');
+const { Token } = require('../models');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -18,7 +19,7 @@ const inviteUser = catchAsync(async (req, res) => {
   }
 
   console.log(otp);
-  await emailService.sendUserInviteEmail(email, otp.code, username);
+  await emailService.sendUserInviteEmail(email, otp);
   res.status(httpStatus.OK).send('Invite sent Successfully');
 });
 
@@ -88,6 +89,36 @@ const invite = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send('Invite sent Successfully');
 });
 
+
+
+// Walk on this route again later
+const resendInvite = catchAsync(async(req, res)=>{
+
+  const { email } = req.body
+  const user = await userService.getUserByEmail(email)
+  // console.log(user)
+  if(user.role == 'user'){
+    const code = await OTPService.generateOTP(email)
+    console.log(code)
+    await emailService.sendUserInviteEmail(email, code)
+    res.status(httpStatus.OK).send('Invite resent Successfully')
+  }
+  else{
+    // console.log("=====>>>")
+    const p = await Token.find({user:user.id, type: 'inviteEmail'})
+    if(p.length !== 0){
+    const token = await tokenService.generateUserInvitationToken(user)
+    // await tokenService.updateTokenById(token._id,{token:token.userInvitationToken})
+    await emailService.resendInviteEmail(email, token.userInvitationToken);
+    res.status(httpStatus.OK).send('Invite resent Successfully')
+    }
+
+  
+  }
+  
+   
+  })
+
 const completeSignup = catchAsync(async (req, res) => {
   let user = await authService.verifyUserSignUp(req.body.token);
 
@@ -115,4 +146,5 @@ module.exports = {
   verifyInvite,
   completeSignup,
   inviteUser,
+  resendInvite
 };

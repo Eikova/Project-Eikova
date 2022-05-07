@@ -11,8 +11,9 @@ const adminRoles = [
   'revokeAccess',
   'toggleStatus',
   'fullPhotoAccess',
+  'resendInvite'
 ];
-const superAdminRoles = [...adminRoles, 'manageAdmin'];
+const superAdminRoles = [...adminRoles, 'manageAdmin', 'deleteUser'];
 
 const allRoles = {
   user: userRoles,

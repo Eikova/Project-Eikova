@@ -63,10 +63,18 @@ const sendInviteEmail = async (to, token , name) => {
   await sendEmail(to, subject, text);
 };
 
-const sendUserInviteEmail = async (to, token, name) => {
+const resendInviteEmail = async (to, token) => {
   const subject = 'Eikova Invite';
   // replace this url with the link to the email verification page of your front-end app
-  const text = `Hi ${name}, Welcome to Eikova, to download pictures, kindly use this passcode:  ${token}`;
+  const inviteUrl = `http://eikova.photos/auth/verify-invite?token=${token}`;
+  const text = `Hi, Welcome to Eikova, to complete your registration kindly click on the link ${inviteUrl}`;
+  await sendEmail(to, subject, text);
+};
+
+const sendUserInviteEmail = async (to, token) => {
+  const subject = 'Eikova Invite';
+  // replace this url with the link to the email verification page of your front-end app
+  const text = `Hi, Welcome to Eikova, to download pictures, kindly use this passcode:  ${token}`;
   await sendEmail(to, subject, text);
 };
 
@@ -76,5 +84,6 @@ module.exports = {
   sendResetPasswordEmail,
   sendVerificationEmail,
   sendInviteEmail,
-  sendUserInviteEmail
+  sendUserInviteEmail,
+  resendInviteEmail
 };

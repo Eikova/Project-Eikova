@@ -18,6 +18,10 @@ router.post('/reset-password', validate(authValidation.resetPassword), authContr
 // router.post('/user/login', validate(authValidation.login), authController.userLogin);
 router.post('/user/invite',auth('manageUsers'), validate(authValidation.invite), authController.inviteUser);
 
+router
+.route('/resend-invite')
+.post(auth('resendInvite'), validate(authValidation.resendInvite), authController.resendInvite)
+
 module.exports = router;
 
 /**

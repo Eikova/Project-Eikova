@@ -6,6 +6,7 @@ const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 
 
+
 /**
  * Login with username and password
  * @param {string} email
@@ -56,6 +57,35 @@ const inviteUser = async(name,email,role,author)=>{
       return { user, token}
  
 }
+
+
+const resendInvite = async(author)=>{
+  if(author.role === 'admin' && (role=== 'super-admin' || role === 'admin' )){
+    throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed to perform this action');
+  }
+  
+  if(role=='user'){
+    const token = await tokenService.generateUserInvitationToken(user)
+    throw new ApiError(httpStatus.BAD_REQUEST, 'You are not permitted to invite a user here');
+
+  }
+
+  else{
+
+  }
+  
+    // let user = await userService.getUserByEmail(email);
+    // if(user){
+    //   throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
+    // }
+      //  user = await userService.createUser({name,email,role})
+      // const token = await tokenService.generateUserInvitationToken(user)
+
+      return { user, token}
+ 
+}
+
+
 
 /** 
  * Verify Invite
@@ -173,6 +203,20 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'signup failed');
   }
 };
+
+// const resendInvite = async(email)=>{
+//   const user = await authService.getUserByEmail(email)
+
+//   if(user.role == 'user'){
+//     const code = await OTPService.generateOTP(email)
+//     await emailService.sendUserInviteEmail(email, code)
+//   }
+//   else{
+    
+//   }
+  
+   
+//   }
 
 
 

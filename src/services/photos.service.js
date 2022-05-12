@@ -109,9 +109,10 @@ const replacePhoto = async (id, file) => {
 };
 
 const uploadPhoto = async (obj, file, userId, isDraft = false) => {
+  console.log(file,"=====> File Path")
   const meta = await getMetadata(file.path);
   console.log(meta, "=====> META")
-  console.log(file.path,"=====> File Path")
+  // console.log(file.path,"=====> File Path")
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;

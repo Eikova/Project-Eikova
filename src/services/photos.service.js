@@ -110,14 +110,15 @@ const replacePhoto = async (id, file) => {
 
 const uploadPhoto = async (obj, file, userId, isDraft = false) => {
   const meta = await getMetadata(file.path);
- console.log("========>1")
+  console.log(meta, "=====> META")
+  console.log(file.path,"=====> File Path")
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;
-  console.log("========>2")
   try {
     const bucketMain = process.env.AWS_BUCKET_MAIN;
     const photo = await uploadToS3(file.path, fileNameMain, bucketMain);
+    console.log(fileNameMain,"====>FileNAmeMain.")
     console.log(photo, "====> service photo")
 
     // upload thumbnails

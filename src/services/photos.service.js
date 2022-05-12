@@ -17,9 +17,9 @@ const s3 = new S3({
 });
 
 const uploadToS3 = async(path, newName, bucket) => {
-  // Read content from the file
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
+  console.log(path,"====>PATH")
   const fileStream = fs.createReadStream(path);
+  console.log(fileStream,"File Stream")
 
   // Setting up S3 upload parameters
   const params = {
@@ -28,6 +28,8 @@ const uploadToS3 = async(path, newName, bucket) => {
     Body: fileStream,
   };
   // Uploading files to the bucket
+  console.log(params.Body,"PARAMS")
+  console.log(await s3.upload(params),"OPOPOPOPOP")
   return s3.upload(params).promise();
 };
 

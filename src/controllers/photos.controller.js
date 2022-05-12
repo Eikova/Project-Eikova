@@ -7,6 +7,7 @@ const { PhotoService } = require('../services');
 
 const createPhoto = catchAsync(async (req, res) => {
   const photo = await PhotoService.uploadPhoto(req.body, req.file, req.user.id);
+  console.log(photo,"===> upload photo controller")
   res.status(httpStatus.CREATED).json({
     status: httpStatus.CREATED,
     message: 'Photo uploaded successfully',

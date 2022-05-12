@@ -85,6 +85,7 @@ const replacePhoto = async (id, file) => {
 
     // upload new thumbnail
     const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${newNameThumb}.webp`);
+    console.log(thumbWebp,"======> Thumbwebp")
     const thumbnailPath = `uploads/${newNameThumb}.webp`;
     const newThumbnail = await uploadToS3(thumbnailPath, newNameThumb, bucketThumbnail);
 
@@ -109,14 +110,15 @@ const replacePhoto = async (id, file) => {
 
 const uploadPhoto = async (obj, file, userId, isDraft = false) => {
   const meta = await getMetadata(file.path);
-
+ console.log("========>1")
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;
-
+  console.log("========>2")
   try {
     const bucketMain = process.env.AWS_BUCKET_MAIN;
     const photo = await uploadToS3(file.path, fileNameMain, bucketMain);
+    console.log(photo, "====> service photo")
 
     // upload thumbnails
     const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${fileNameThumb}.webp`);
@@ -124,6 +126,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
 
     const bucketThumbnail = process.env.AWS_BUCKET_THUMBNAILS;
     const thumbnail = await uploadToS3(thumbnailPath, fileNameThumb, bucketThumbnail);
+    console.log(thumbnail,"=====>thumbnail2")
 
     // const meta = await sharp(file.path).metadata();
 
@@ -142,12 +145,14 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
       metadata: meta,
       user: userId,
     };
+    console.log("========>3")
 
     if (!isDraft) {
       photoData.is_published = true;
     }
     const data = await Photos.create({ ...photoData });
     const index = await addToSearchIndex(data);
+  console.log(index,'====> index')
     return data;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);

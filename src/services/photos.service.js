@@ -112,8 +112,8 @@ const replacePhoto = async (id, file) => {
 
 const uploadPhoto = async (obj, file, userId, isDraft = false) => {
   console.log(file,"=====> File Path")
-  const meta = await getMetadata(file.path);
-  console.log(meta, "=====> META")
+  // const meta = await getMetadata(file.path);
+  // console.log(meta, "=====> META")
   // console.log(file.path,"=====> File Path")
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
@@ -146,7 +146,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
       year: obj.year,
       month: obj.month,
       meeting_id: obj.meeting_id,
-      metadata: meta,
+      // metadata: meta,
       user: userId,
     };
     console.log("========>3")

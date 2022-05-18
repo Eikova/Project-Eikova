@@ -45,13 +45,11 @@ const PhotoSchema = mongoose.Schema(
       type: Number,
       required: [true, 'A month must be provided'],
     },
-    meeting_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Meeting',
+    meeting: {
+      type: String,
     },
-    people_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'People',
+    people: {
+      type: String,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

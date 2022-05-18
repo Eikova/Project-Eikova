@@ -10,6 +10,15 @@ const PeopleSchema = mongoose.Schema({
     maxlength: 40,
     unique: true,
   },
+
+  type: {
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 4,
+    maxlength: 40,
+  },
+
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

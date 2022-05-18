@@ -36,7 +36,8 @@ const createIndex = async () => {
         downloads: { type: 'long' },
         year: { type: 'text' },
         month: { type: 'text' },
-        meeting_id: { type: 'text' },
+        meeting: { type: 'text' },
+        people: { type: 'text' },
         user: { type: 'text' },
         createdAt: { type: 'date' },
         updatedAt: { type: 'date' },
@@ -102,19 +103,6 @@ const updateSearchIndex = async (id, photo) => {
   }
 };
 
-const deleteFromSearchIndex = async (id) => {
-  try {
-    const doc = await getFromIndexByPhotoId(id);
-    await client.delete({
-      index,
-      id: doc._id,
-    });
-    logger.info('Deleted from search index successfully!');
-  } catch (err) {
-    logger.error(err);
-  }
-};
-
 const getFromIndexById = async (id) => {
   try {
     const { body } = await client.get({
@@ -145,6 +133,19 @@ const getFromIndexByPhotoId = async (photoId) => {
   }
 };
 
+const deleteFromSearchIndex = async (id) => {
+  try {
+    const doc = await getFromIndexByPhotoId(id);
+    await client.delete({
+      index,
+      id: doc._id,
+    });
+    logger.info('Deleted from search index successfully!');
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
 const searchIndex = async (phrase, options) => {
   try {
     return await client.search({
@@ -166,7 +167,7 @@ const searchIndex = async (phrase, options) => {
               {
                 multi_match: {
                   query: phrase,
-                  fields: ['title^3', 'description', 'tags^2', 'year', 'month', 'meeting_id'], // add people_id
+                  fields: ['title^3', 'description', 'tags^2', 'year', 'month', 'meeting', 'people'], // add people_id
                 },
               },
             ],

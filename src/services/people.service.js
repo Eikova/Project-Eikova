@@ -10,18 +10,23 @@ const getPeople = async () => {
   return people;
 };
 
-const createPeople = async (people, user) => {
-  const existingPeople = await People.findOne({ people });
+const createPeople = async (name, type, user) => {
+  const existingPeople = await People.findOne({ name });
   if (existingPeople) {
     throw new ApiError(httpStatus.CONFLICT, 'People already exists');
   }
-  const data = { name: people, author: user };
+  const data = { name, type, author: user };
   const newpeople = await People.create(data);
   return newpeople;
 };
 
-const searchPeople = async (people) => {
-  const peoples = await People.find({ name: { $regex: people, $options: 'i' } }).limit(10);
+const searchPeople = async (people, isType = false) => {
+  let peoples;
+  if (isType) {
+    peoples = await People.find({ type: { $regex: people, $options: 'i' } }).limit(10);
+  } else {
+    peoples = await People.find({ name: { $regex: people, $options: 'i' } }).limit(10);
+  }
   if (!peoples) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No People found');
   }

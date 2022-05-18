@@ -3,7 +3,7 @@ const catchAsync = require('../utils/catchAsync');
 const { PeopleService } = require('../services');
 
 const createPeople = catchAsync(async (req, res) => {
-  const people = await PeopleService.createPeople(req.body.name, req.user.id);
+  const people = await PeopleService.createPeople(req.body.name, req.body.type, req.user.id);
   res.status(httpStatus.CREATED).json({
     status: 'success',
     people,
@@ -61,7 +61,12 @@ const deletePeople = catchAsync(async (req, res) => {
 });
 
 const searchPeople = catchAsync(async (req, res) => {
-  const people = await PeopleService.searchPeople(req.query.name);
+  let people;
+  if (req.query.isType) {
+    people = await PeopleService.searchPeople(req.query.q, true);
+  } else {
+    people = await PeopleService.searchPeople(req.query.q);
+  }
   res.status(httpStatus.OK).json({
     status: 'success',
     people,

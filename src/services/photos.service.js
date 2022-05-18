@@ -81,7 +81,7 @@ const replacePhoto = async (id, file) => {
     const newPhoto = await uploadToS3(file.path, newNameMain, bucketMain);
 
     // upload new thumbnail
-    const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${newNameThumb}.webp`);
+    const thumbWebp = await sharp(file.path).resize(500, 500).toFile(`uploads/${newNameThumb}.webp`);
     const thumbnailPath = `uploads/${newNameThumb}.webp`;
     const newThumbnail = await uploadToS3(thumbnailPath, newNameThumb, bucketThumbnail);
 
@@ -111,7 +111,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
   try {
     const bucketMain = process.env.AWS_BUCKET_MAIN;
     const photo = await uploadToS3(file.path, fileNameMain, bucketMain);
-    const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${fileNameThumb}.webp`);
+    const thumbWebp = await sharp(file.path).resize(500, 500).toFile(`uploads/${fileNameThumb}.webp`);
     const thumbnailPath = `uploads/${fileNameThumb}.webp`;
 
     const bucketThumbnail = process.env.AWS_BUCKET_THUMBNAILS;
@@ -130,7 +130,8 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
       tags: obj.tags,
       year: obj.year,
       month: obj.month,
-      meeting_id: obj.meeting_id,
+      meeting: obj.meeting,
+      people: obj.people,
       metadata: meta,
       user: userId,
     };
@@ -146,8 +147,11 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
   }
 };
 
-const getPhotos = async (options) => {
+const getPhotos = async (options, people = null) => {
   try {
+    if (people !== null) {
+      return await Photos.find({ type: { $regex: people, $options: 'i' } }).limit(10);
+    }
     return await Photos.paginate({ is_published: true, is_deleted: false, is_private: false }, options);
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
@@ -172,7 +176,17 @@ const getContributions = async (userId, options) => {
 
 const getPhoto = async (id) => {
   try {
-    return await Photos.findOne({ _id: id, is_deleted: false });
+    const photo = await Photos.findOne({ _id: id, is_deleted: false });
+    if (!photo) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Photo not found');
+    }
+    const relatedPhotos = await Photos.find({
+      is_published: true,
+      is_deleted: false,
+      is_private: false,
+      tags: { $in: photo.tags },
+    }).limit(10);
+    return { photo, relatedPhotos };
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -220,7 +234,8 @@ const updatePhoto = async (id, obj) => {
     data.tags = obj.tags ? obj.tags : photo.tags;
     data.year = obj.year ? obj.year : photo.year;
     data.month = obj.month ? obj.month : photo.month;
-    data.meeting_id = obj.meeting_id ? obj.meeting_id : photo.meeting_id;
+    data.meeting = obj.meeting ? obj.meeting : photo.meeting;
+    data.people = obj.people ? obj.people : photo.people;
 
     const updateDetails = { ...data, modified_at: Date.now() };
     const update = await Photos.findByIdAndUpdate(id, updateDetails, { new: true });

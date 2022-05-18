@@ -1,7 +1,6 @@
 const httpStatus = require('http-status');
-const  moment  = require('moment');
-const { Otp } = require('../models');
-// const { findById } = require('../models/token.model');
+const { OTP } = require('../models');
+const Otp = require('../models/otp.model');
 const ApiError = require('../utils/ApiError');
 
 
@@ -12,11 +11,12 @@ const generateCode = () => {
     code += Math.floor(Math.random() * 10);
   }
   return code;
+  
 };
 
 
 const updateOtpById = async (otpId, updateBody) => {
-  const otp = await Otp.findById(otpId);
+  const otp = await OTP.findById(otpId);
   if (!otp) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Otp not found');
   }
@@ -30,28 +30,38 @@ const updateOtpById = async (otpId, updateBody) => {
 
 const generateOTP = async (email) => {
   const code = generateCode();
-  const otp = await Otp.findOne({ email });
+  const otp = await OTP.findOne({ email });
 
-  if (otp && otp.is_expired === true) {
-    await updateOtpById(otp.id, { code, is_expired: false });
+  if(!otp){
+    const createOtp = await OTP.create({
+      email,
+      code,
+    });
+  
+    return createOtp.code;
   }
 
-  // if there is an otp, and it's not expired, prompt that Otp has been sent already
-  else if (otp && otp.is_expired === false) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Otp sent already');
+  if (otp && otp.is_expired === true) {
+    const d = await updateOtpById(otp.id,{is_expired:false, code:code})
+    console.log(d,"=====>>>>>")
+    return code
+    // throw new ApiError(httpStatus.BAD_REQUEST, 'Otp expired');
+  }
+
+  
+  if(otp && otp.is_expired === false){
+    // throw new ApiError(httpStatus.BAD_REQUEST, 'Otp sent already');
+    // otp.is_expired === true;
+    const d = await updateOtpById(otp.id,{code})
+   return code
   }
 
   // after code has expired, delete from the database
-  const createOtp = await Otp.create({
-    email,
-    code,
-  });
 
-  return createOtp;
 };
 
 const verifyOTP = async (email, code) => {
-  const otp = await Otp.findOne({ email, code });
+  const otp = await OTP.findOne({ email, code });
   if (!otp) {
     return false;
   }

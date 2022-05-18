@@ -7,7 +7,7 @@ const auth = require('../../middlewares/auth');
 const router = express.Router();
 
 router.post('/invite', auth('manageUsers'), validate(authValidation.invite), authController.invite);
-router.post('/complete-signup', validate(authValidation.register), authController.completeSignup);
+router.post('/signup', validate(authValidation.register), authController.completeSignup);
 router.post('/verify-invite', validate(authValidation.verifyInvite), authController.verifyInvite);
 // router.post('/register', validate(authValidation.register), authController.register);
 router.post('/login', validate(authValidation.login), authController.login);
@@ -15,8 +15,12 @@ router.post('/logout', validate(authValidation.logout), authController.logout);
 // router.post('/refresh-tokens', validate(authValidation.refreshTokens), authController.refreshTokens);
 router.post('/forgot-password', validate(authValidation.forgotPassword), authController.forgotPassword);
 router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
-router.post('/user/login', validate(authValidation.login), authController.userLogin);
-router.post('/user/send-otp', validate(authValidation.invite), authController.inviteUser);
+// router.post('/user/login', validate(authValidation.login), authController.userLogin);
+router.post('/user/invite',auth('manageUsers'), validate(authValidation.invite), authController.inviteUser);
+
+router
+.route('/resend-invite')
+.post(auth('resendInvite'), validate(authValidation.resendInvite), authController.resendInvite)
 
 module.exports = router;
 

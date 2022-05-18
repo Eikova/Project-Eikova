@@ -1,7 +1,8 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService, emailService, otpService } = require('../services');
+const { authService, userService, tokenService, emailService, OTPService } = require('../services');
 const ApiError = require('../utils/ApiError');
+const { Token } = require('../models');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -9,35 +10,40 @@ const register = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send({ user, tokens });
 });
 
-const login = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await authService.loginUserWithEmailAndPassword(email, password);
-  const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens });
-});
-
 const inviteUser = catchAsync(async (req, res) => {
-  const { email } = req.body;
-  const otp = await otpService.generateOTP(email);
-  await emailService.sendUserInviteEmail(email, otp.code);
+  const { email, username } = req.body;
+  const otp = await OTPService.generateOTP(email);
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    await userService.createUser({ email, username, role: 'user' });
+  }
+  await emailService.sendUserInviteEmail(email, otp);
   res.status(httpStatus.OK).send('Invite sent Successfully');
 });
 
-const userLogin = catchAsync(async (req, res) => {
+const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const verify = await otpService.verifyOTP(email, password);
-  if (!verify) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'invalid Email or Token');
-  }
-  const getUser = await userService.getUserByEmail(email);
-  if (!getUser) {
-    let user = await userService.createUser(req.body);
-    user = await userService.updateUserById(user.id, { status: 'active' });
-    const tokens = await tokenService.generateOneTimeToken(user);
+  //ensure other users can login with this route too
+  const user = await userService.getUserByEmail(email);
+  if (user.role !== 'user') {
+    const user = await authService.loginUserWithEmailAndPassword(email, password);
+    const tokens = await tokenService.generateAuthTokens(user);
     res.send({ user, tokens });
   } else {
-    const tokens = await tokenService.generateOneTimeToken(getUser);
-    res.send({ user: getUser, tokens });
+    const verify = await OTPService.verifyOTP(email, password);
+
+    if (!verify) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'invalid Email or Token');
+    }
+
+    const getUser = await userService.getUserByEmail(email);
+    if (getUser) {
+      const user = await userService.updateUserById(getUser.id, { status: 'enabled' });
+      const tokens = await tokenService.generateOneTimeToken(getUser);
+      res.send({ user, tokens });
+    } else {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'invalid credentials');
+    }
   }
 });
 
@@ -59,7 +65,7 @@ const forgotPassword = catchAsync(async (req, res) => {
 
 const resetPassword = catchAsync(async (req, res) => {
   await authService.resetPassword(req.query.token, req.body.password);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.OK).send('password reset successfully');
 });
 
 const verifyInvite = catchAsync(async (req, res) => {
@@ -69,11 +75,32 @@ const verifyInvite = catchAsync(async (req, res) => {
 });
 
 const invite = catchAsync(async (req, res) => {
-  const { name, email, role } = req.body;
-  // send Email before saving to DB
-  const user = await authService.inviteUser(name, email, role, req.user);
-  await emailService.sendInviteEmail(email, user.token.userInvitationToken);
+  const { username, email, role } = req.body;
+  let user = await userService.getUserByEmail(email);
+  if (user) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'User already Exists');
+  }
+  user = await authService.inviteUser(username, email, role, req.user);
+  await emailService.sendInviteEmail(email, user.token.userInvitationToken, username);
   res.status(httpStatus.OK).send('Invite sent Successfully');
+});
+
+const resendInvite = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  const user = await userService.getUserByEmail(email);
+  if (user.role === 'user') {
+    const code = await OTPService.generateOTP(email);
+    await emailService.sendUserInviteEmail(email, code);
+    res.status(httpStatus.OK).send('Invite resent Successfully');
+  } else {
+    const p = await Token.find({ user: user.id, type: 'inviteEmail' });
+    if (p.length !== 0) {
+      const token = await tokenService.generateUserInvitationToken(user);
+      // await tokenService.updateTokenById(token._id,{token:token.userInvitationToken})
+      await emailService.resendInviteEmail(email, token.userInvitationToken);
+      res.status(httpStatus.OK).send('Invite resent Successfully');
+    }
+  }
 });
 
 const completeSignup = catchAsync(async (req, res) => {
@@ -102,6 +129,6 @@ module.exports = {
   invite,
   verifyInvite,
   completeSignup,
-  userLogin,
   inviteUser,
+  resendInvite,
 };

@@ -4,10 +4,9 @@ const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const { photoController } = require('../../controllers');
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: 'uploads' });
 
 const router = express.Router();
-
 
 router
   .route('/')

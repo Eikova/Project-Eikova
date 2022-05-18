@@ -5,7 +5,7 @@ const register = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
-    name: Joi.string(),
+    username: Joi.string(),
     position: Joi.string(),
     department: Joi.string(),
     token: Joi.string()
@@ -88,6 +88,15 @@ const verifyInvite = {
 //   }),
 // };
 
+const resendInvite = {
+  body: Joi.object()
+    .keys({
+      email: Joi.string().email(),
+
+    })
+    .min(1),
+};
+
 module.exports = {
   register,
   login,
@@ -98,5 +107,6 @@ module.exports = {
   verifyEmail,
   invite,
   verifyInvite,
-  invite2
+  invite2,
+  resendInvite
 };

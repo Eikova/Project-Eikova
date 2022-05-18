@@ -29,6 +29,9 @@ const envVarsSchema = Joi.object()
     SMTP_USERNAME: Joi.string().description('username for email server'),
     SMTP_PASSWORD: Joi.string().description('password for email server'),
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
+    SERVICE:Joi.string().description('server that will send the emails'),
+    USER:Joi.string().description('server that will send the emails'),
+    PASS: Joi.string().description('server that will send the emails'),
   })
   .unknown();
 
@@ -54,6 +57,9 @@ module.exports = {
       useUnifiedTopology: true,
     },
   },
+  service: envVars.SERVICE,
+  user: envVars.USER,
+  pass:envVars.PASS,
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,

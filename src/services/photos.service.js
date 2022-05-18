@@ -17,9 +17,9 @@ const s3 = new S3({
 });
 
 const uploadToS3 = async(path, newName, bucket) => {
-  // Read content from the file
-  // eslint-disable-next-line security/detect-non-literal-fs-filename
+  console.log(path,"====>PATH")
   const fileStream = fs.createReadStream(path);
+  console.log(fileStream,"File Stream")
 
   // Setting up S3 upload parameters
   const params = {
@@ -28,6 +28,8 @@ const uploadToS3 = async(path, newName, bucket) => {
     Body: fileStream,
   };
   // Uploading files to the bucket
+  console.log(params.Body,"PARAMS")
+  console.log(await s3.upload(params),"OPOPOPOPOP")
   return s3.upload(params).promise();
 };
 
@@ -85,6 +87,7 @@ const replacePhoto = async (id, file) => {
 
     // upload new thumbnail
     const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${newNameThumb}.webp`);
+    console.log(thumbWebp,"======> Thumbwebp")
     const thumbnailPath = `uploads/${newNameThumb}.webp`;
     const newThumbnail = await uploadToS3(thumbnailPath, newNameThumb, bucketThumbnail);
 
@@ -108,15 +111,18 @@ const replacePhoto = async (id, file) => {
 };
 
 const uploadPhoto = async (obj, file, userId, isDraft = false) => {
-  const meta = await getMetadata(file.path);
-
+  console.log(file,"=====> File Path")
+  // const meta = await getMetadata(file.path);
+  // console.log(meta, "=====> META")
+  // console.log(file.path,"=====> File Path")
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;
-
   try {
     const bucketMain = process.env.AWS_BUCKET_MAIN;
     const photo = await uploadToS3(file.path, fileNameMain, bucketMain);
+    console.log(fileNameMain,"====>FileNAmeMain.")
+    console.log(photo, "====> service photo")
 
     // upload thumbnails
     const thumbWebp = await sharp(file.path).resize(300, 300).toFile(`uploads/${fileNameThumb}.webp`);
@@ -124,6 +130,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
 
     const bucketThumbnail = process.env.AWS_BUCKET_THUMBNAILS;
     const thumbnail = await uploadToS3(thumbnailPath, fileNameThumb, bucketThumbnail);
+    console.log(thumbnail,"=====>thumbnail2")
 
     // const meta = await sharp(file.path).metadata();
 
@@ -139,15 +146,17 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
       year: obj.year,
       month: obj.month,
       meeting_id: obj.meeting_id,
-      metadata: meta,
+      // metadata: meta,
       user: userId,
     };
+    console.log("========>3")
 
     if (!isDraft) {
       photoData.is_published = true;
     }
     const data = await Photos.create({ ...photoData });
     const index = await addToSearchIndex(data);
+  console.log(index,'====> index')
     return data;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);

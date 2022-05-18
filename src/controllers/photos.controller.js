@@ -6,7 +6,9 @@ const catchAsync = require('../utils/catchAsync');
 const { PhotoService } = require('../services');
 
 const createPhoto = catchAsync(async (req, res) => {
+  console.log(req.file,"=======>THIS IS IT")
   const photo = await PhotoService.uploadPhoto(req.body, req.file, req.user.id);
+  // console.log(photo,"===> upload photo controller")
   res.status(httpStatus.CREATED).json({
     status: httpStatus.CREATED,
     message: 'Photo uploaded successfully',
@@ -33,7 +35,7 @@ const createDraft = catchAsync(async (req, res) => {
 });
 
 const getPhotos = catchAsync(async (req, res) => {
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page', 'populate']);
   if (req.query.sortBy === 'oldest') {
     options.sortBy = 'asc';
   } else {

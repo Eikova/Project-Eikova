@@ -23,7 +23,7 @@ const getAMeeting = catchAsync(async (req, res) => {
   if (!meeting) {
     return res.status(httpStatus.NOT_FOUND).json({
       status: 'fail',
-      message: 'Person not found',
+      message: 'Meeting not found',
     });
   }
   res.status(httpStatus.OK).json({
@@ -37,7 +37,7 @@ const updateMeeting = catchAsync(async (req, res) => {
   if (!meeting) {
     return res.status(httpStatus.NOT_FOUND).json({
       status: 'fail',
-      message: 'Person not found',
+      message: 'Meeting not found',
     });
   }
   res.status(httpStatus.OK).json({
@@ -51,7 +51,7 @@ const deleteMeeting = catchAsync(async (req, res) => {
   if (!meeting) {
     return res.status(httpStatus.NOT_FOUND).json({
       status: 'fail',
-      message: 'Person not found',
+      message: 'Meeting not found',
     });
   }
   res.status(httpStatus.OK).json({

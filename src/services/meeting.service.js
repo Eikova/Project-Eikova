@@ -5,7 +5,7 @@ const ApiError = require('../utils/ApiError');
 const getMeeting = async () => {
   const meeting = await Meeting.find({});
   if (!meeting) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'No People found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Meeting found');
   }
   return meeting;
 };

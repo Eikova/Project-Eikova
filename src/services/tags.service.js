@@ -37,7 +37,7 @@ const getTag = async (tagId) => {
 };
 
 const updateTag = async (tagId, tagBody) => {
-  const tag = {tag: tagBody.tag.toLowerCase()};
+  const tag = { tag: tagBody.tag.toLowerCase() };
   const response = await Tag.findByIdAndUpdate(tagId, tag, { new: true });
   if (!response) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Tag not found');

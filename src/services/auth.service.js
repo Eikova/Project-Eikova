@@ -20,7 +20,6 @@ const loginUserWithEmailAndPassword = async (email, password) => {
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
-  //ideally shouldnt get here in the first place, but just a check incase
   if(user.role === 'user'){
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Access Denied');
   }
@@ -30,7 +29,6 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 
 /**
  * InviteUser
- * @param {string} userCredentials
  * @returns {Promise}
  */
 
@@ -41,21 +39,21 @@ const inviteUser = async(name,email,role,author)=>{
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed to perform this action');
   }
 
-  if(role=='user'){
+  if(role==='user'){
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not permitted to invite a user here');
 
   }
-  
+
     // let user = await userService.getUserByEmail(email);
     // if(user){
     //   throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
     // }
-    
-       user = await userService.createUser({name,email,role})
+
+  let user = await userService.createUser({ name, email, role });
       const token = await tokenService.generateUserInvitationToken(user)
 
       return { user, token}
- 
+
 }
 
 
@@ -63,8 +61,8 @@ const resendInvite = async(author)=>{
   if(author.role === 'admin' && (role=== 'super-admin' || role === 'admin' )){
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed to perform this action');
   }
-  
-  if(role=='user'){
+
+  if(role==='user'){
     const token = await tokenService.generateUserInvitationToken(user)
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not permitted to invite a user here');
 
@@ -73,7 +71,7 @@ const resendInvite = async(author)=>{
   else{
 
   }
-  
+
     // let user = await userService.getUserByEmail(email);
     // if(user){
     //   throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
@@ -82,12 +80,12 @@ const resendInvite = async(author)=>{
       // const token = await tokenService.generateUserInvitationToken(user)
 
       return { user, token}
- 
+
 }
 
 
 
-/** 
+/**
  * Verify Invite
  * @param {string} token
  * @returns {Promise}
@@ -95,7 +93,7 @@ const resendInvite = async(author)=>{
 
 const verifyInvitation = async(token)=>{
 
-  try{  
+  try{
   const verify = await tokenService.verifyToken(token,tokenTypes.USER_INVITATION)
   let user = await userService.getUserById(verify.user)
   if (!user) {
@@ -212,10 +210,10 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
 //     await emailService.sendUserInviteEmail(email, code)
 //   }
 //   else{
-    
+
 //   }
-  
-   
+
+
 //   }
 
 

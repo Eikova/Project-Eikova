@@ -16,7 +16,8 @@ const createPeople = async (people, user) => {
     throw new ApiError(httpStatus.CONFLICT, 'People already exists');
   }
   const data = { name: people, author: user };
-  return await People.create(data);
+  const newpeople = await People.create(data);
+  return newpeople;
 };
 
 const searchPeople = async (people) => {

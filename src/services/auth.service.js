@@ -4,6 +4,7 @@ const userService = require('./user.service');
 const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
+const logger = require("../config/logger");
 
 
 
@@ -23,6 +24,7 @@ const loginUserWithEmailAndPassword = async (email, password) => {
   if(user.role === 'user'){
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Access Denied');
   }
+  logger.info(`User with email: (${email}) signed in.`);
   return user;
 };
 
@@ -52,6 +54,7 @@ const inviteUser = async(name,email,role,author)=>{
   let user = await userService.createUser({ name, email, role });
       const token = await tokenService.generateUserInvitationToken(user)
 
+      logger.info(`User with email: (${email}) provisioned for ${role} role.`);
       return { user, token}
 
 }

@@ -21,6 +21,7 @@ if (config.env !== 'test') {
 const sendEmail = async (to, subject, text) => {
   const msg = { from: config.email.from, to, subject, text };
   await transport.sendMail(msg);
+  logger.info(`New Email sent to address (${to}) with subject (${subject}).`);
 };
 
 /**

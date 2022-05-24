@@ -2,12 +2,15 @@ const httpStatus = require('http-status');
 const { OTP } = require('../models');
 const Otp = require('../models/otp.model');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
+
 
 const generateCode = () => {
   let code = '';
   for (let i = 0; i < 6; i++) {
     code += Math.floor(Math.random() * 10);
   }
+  logger.info(`OTP generated: ${code}`);
   return code;
 };
 

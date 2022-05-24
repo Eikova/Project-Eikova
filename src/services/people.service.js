@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { People } = require('../models');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 const getPeople = async () => {
   const people = await People.find({});
@@ -17,6 +18,7 @@ const createPeople = async (name, type, user) => {
   }
   const data = { name, type, author: user };
   const newpeople = await People.create(data);
+  logger.info(`people (${name}) created successfully`);
   return newpeople;
 };
 

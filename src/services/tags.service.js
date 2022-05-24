@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Tag } = require('../models');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 const getTags = async () => {
   const tags = await Tag.find({});
@@ -17,7 +18,9 @@ const createTag = async (tag, user) => {
     throw new ApiError(httpStatus.CONFLICT, 'Tag already exists');
   }
   const data = { tag: fmtTag, author: user };
-  return await Tag.create(data);
+  const res = await Tag.create(data);
+  logger.info(`New tag (${tag}) created.`);
+  return res;
 };
 
 const searchTags = async (tag) => {

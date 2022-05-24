@@ -32,7 +32,9 @@ const uploadToS3 = async(path, newName, bucket) => {
     Body: fileStream,
   };
   // Uploading files to the bucket
-  return s3.upload(params).promise();
+  const action = s3.upload(params).promise();
+  logger.info(`AWS S3 action: file (${newName}) created in ${bucket} bucket.`);
+  return action;
 };
 
 const deleteFromS3 = (path, bucket) => {
@@ -42,7 +44,9 @@ const deleteFromS3 = (path, bucket) => {
     Key: path,
   };
   // Deleting files from the bucket
-  return s3.deleteObject(params).promise();
+  const action = s3.deleteObject(params).promise();
+  logger.info(`AWS S3 action: file (${path}) deleted from ${bucket} bucket.`);
+  return action;
 };
 
 const destroyPhoto = async (path, bucket) => {
@@ -146,6 +150,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
     }
     const data = await Photos.create({ ...photoData });
     const index = await addToSearchIndex(data);
+    logger.info(`photo (${url}) uploaded successfully`);
     return data;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
@@ -161,6 +166,7 @@ const batchUploadPhoto = async (data, files, userId) => {
       const photo = await uploadPhoto(body, image, userId);
       response.push(photo);
     }
+    logger.info(`bulk photo write action finished successfully`);
     return response;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
@@ -227,6 +233,7 @@ const togglePhotoPrivacy = async (id) => {
     const data = { is_private: !privacy, modified_at: Date.now() };
     const update = await Photos.findByIdAndUpdate(id, data, { new: true });
     await updateSearchIndex(id, data);
+    logger.info(`privacy changed for photo with ID: (${id}).`);
     return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
@@ -238,6 +245,7 @@ const deletePhoto = async (id) => {
     const data = { is_deleted: true, modified_at: Date.now() };
     const update = await Photos.findByIdAndUpdate(id, data, { new: true });
     await updateSearchIndex(id, data);
+    logger.info(`photo with ID: (${id}) deleted.`);
     return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
@@ -260,6 +268,7 @@ const updatePhoto = async (id, obj) => {
     const updateDetails = { ...data, modified_at: Date.now() };
     const update = await Photos.findByIdAndUpdate(id, updateDetails, { new: true });
     await updateSearchIndex(id, updateDetails);
+    logger.info(`photo with ID: (${id}) updated.`);
     return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
@@ -271,6 +280,7 @@ const publishDraft = async (id) => {
     const data = { is_published: true, modified_at: Date.now() };
     const update = await Photos.findByIdAndUpdate(id, data, { new: true });
     await updateSearchIndex(id, data);
+    logger.info(`Draft photo with ID: (${id}) published.`);
     return update;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);

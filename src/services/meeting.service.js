@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Meeting } = require('../models');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 const getMeeting = async () => {
   const meeting = await Meeting.find({});
@@ -16,7 +17,9 @@ const createMeeting = async (meeting, user) => {
     throw new ApiError(httpStatus.CONFLICT, 'meeting already exists');
   }
   const data = { name: meeting, author: user };
-  return await Meeting.create(data);
+  const query = await Meeting.create(data);
+  logger.info(`Meeting (${meeting}) created successfully`);
+  return query;
 };
 
 const searchMeeting= async (meeting) => {

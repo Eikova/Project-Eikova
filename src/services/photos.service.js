@@ -6,6 +6,7 @@ const { promisify } = require('util');
 const ExifReader = require('exifreader');
 
 const unlinkAsync = promisify(fs.unlink);
+const logger = require('../config/logger');
 const { Photos } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { addToSearchIndex, updateSearchIndex, searchIndex } = require('../middlewares/elasticsearch');
@@ -15,6 +16,13 @@ const s3 = new S3({
   accessKeyId: process.env.ACCESS_KEY_ID,
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
 });
+
+const deleteFile = (path) => {
+  fs.unlink(path, (err) => {
+    if (err) logger.error(err);
+    logger.info(`file ${path} deleted successfully`);
+  });
+};
 
 const uploadToS3 = async(path, newName, bucket) => {
   const fileStream = fs.createReadStream(path);
@@ -85,9 +93,10 @@ const replacePhoto = async (id, file) => {
     const thumbnailPath = `uploads/${newNameThumb}.webp`;
     const newThumbnail = await uploadToS3(thumbnailPath, newNameThumb, bucketThumbnail);
 
-
-    await unlinkAsync(file.path);
-    await unlinkAsync(thumbnailPath);
+    // await unlinkAsync(file.path);
+    // await unlinkAsync(thumbnailPath);
+    deleteFile(file.path);
+    deleteFile(thumbnailPath);
 
     // save to db
     const newPhotoDetails = {
@@ -119,8 +128,10 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
 
     // const meta = await sharp(file.path).metadata();
 
-    await unlinkAsync(file.path);
-    await unlinkAsync(thumbnailPath);
+    // await unlinkAsync(file.path);
+    // await unlinkAsync(thumbnailPath);
+    deleteFile(file.path);
+    deleteFile(thumbnailPath);
 
     const photoData = {
       url: photo.Location,
@@ -142,6 +153,21 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
     const data = await Photos.create({ ...photoData });
     const index = await addToSearchIndex(data);
     return data;
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
+const batchUploadPhoto = async (data, files, userId) => {
+  const response = [];
+  try {
+    for (let i = 0; i < data.length; i++) {
+      const body = data[i];
+      const image = files[i];
+      const photo = await uploadPhoto(body, image, userId);
+      response.push(photo);
+    }
+    return response;
   } catch (error) {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
@@ -267,6 +293,7 @@ const searchPhotos = async (query, options) => {
 
 module.exports = {
   uploadPhoto,
+  batchUploadPhoto,
   getPhotos,
   downloadPhoto,
   togglePhotoPrivacy,

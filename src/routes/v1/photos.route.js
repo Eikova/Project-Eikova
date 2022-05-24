@@ -26,6 +26,8 @@ router.route('/:id/replace').patch(auth('managePhotos'), upload.single('image'),
 
 router.route('/upload').post(auth('managePhotos'), upload.single('image'), photoController.createPhoto);
 
+router.route('/upload/bulk').post(auth('managePhotos'), upload.array('image', 10), photoController.bulkPhotoUpload);
+
 router.route('/drafts').post(auth('managePhotos'), upload.single('image'), photoController.createDraft);
 
 router.route('/drafts/:id/publish').patch(auth('managePhotos'), photoController.publishDraft);

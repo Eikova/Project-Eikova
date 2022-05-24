@@ -5,6 +5,29 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { PhotoService } = require('../services');
 
+const bulkPhotoUpload = catchAsync(async (req, res) => {
+  const data = JSON.parse(req.body.photos);
+  if (typeof data !== 'object') {
+    res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
+      status: httpStatus.UNPROCESSABLE_ENTITY,
+      message: 'data is not an object',
+      type_of_data_sent: typeof data,
+    });
+  } else if (data.length < 2) {
+    res.status(httpStatus.BAD_REQUEST).json({
+      status: httpStatus.BAD_REQUEST,
+      message: "use the '/upload' endpoint instead for non-bulk uploads.",
+      length_of_data_sent: data.length,
+    });
+  }
+  const query = await PhotoService.batchUploadPhoto(data, req.files, req.user.id);
+  res.status(httpStatus.CREATED).json({
+    status: httpStatus.CREATED,
+    message: 'Bulk Photos uploaded successfully',
+    data: query,
+  });
+});
+
 const createPhoto = catchAsync(async (req, res) => {
   const photo = await PhotoService.uploadPhoto(req.body, req.file, req.user.id);
   res.status(httpStatus.CREATED).json({
@@ -173,6 +196,7 @@ const publishDraft = catchAsync(async (req, res) => {
 
 module.exports = {
   createPhoto,
+  bulkPhotoUpload,
   createDraft,
   getPhotos,
   downloadPhoto,

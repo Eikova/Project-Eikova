@@ -6,17 +6,23 @@ const catchAsync = require('../utils/catchAsync');
 const { PhotoService } = require('../services');
 
 const bulkPhotoUpload = catchAsync(async (req, res) => {
+  if (!req.files || !req.body.photos) {
+    res.status(httpStatus.BAD_REQUEST).json({
+      status: httpStatus.BAD_REQUEST,
+      message: 'No Image file (or/and) incorrect data format.',
+    });
+  }
   const data = JSON.parse(req.body.photos);
   if (typeof data !== 'object') {
     res.status(httpStatus.UNPROCESSABLE_ENTITY).json({
       status: httpStatus.UNPROCESSABLE_ENTITY,
-      message: 'data is not an object',
+      message: 'Data not a JSON object.',
       type_of_data_sent: typeof data,
     });
   } else if (data.length < 2) {
     res.status(httpStatus.BAD_REQUEST).json({
       status: httpStatus.BAD_REQUEST,
-      message: "use the '/upload' endpoint instead for non-bulk uploads.",
+      message: "use '/upload' endpoint for non-bulk uploads.",
       length_of_data_sent: data.length,
     });
   }
@@ -29,6 +35,12 @@ const bulkPhotoUpload = catchAsync(async (req, res) => {
 });
 
 const createPhoto = catchAsync(async (req, res) => {
+  if (!req.file) {
+    res.status(httpStatus.BAD_REQUEST).json({
+      status: httpStatus.BAD_REQUEST,
+      message: 'No image file',
+    });
+  }
   const photo = await PhotoService.uploadPhoto(req.body, req.file, req.user.id);
   res.status(httpStatus.CREATED).json({
     status: httpStatus.CREATED,
@@ -38,6 +50,12 @@ const createPhoto = catchAsync(async (req, res) => {
 });
 
 const replacePhoto = catchAsync(async (req, res) => {
+  if (!req.file) {
+    res.status(httpStatus.BAD_REQUEST).json({
+      status: httpStatus.BAD_REQUEST,
+      message: 'No image file',
+    });
+  }
   const photo = await PhotoService.replacePhoto(req.params.id, req.file);
   res.status(httpStatus.OK).json({
     status: httpStatus.OK,

@@ -2,10 +2,8 @@ const httpStatus = require('http-status');
 const sharp = require('sharp');
 const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
-const { promisify } = require('util');
 const ExifReader = require('exifreader');
 
-const unlinkAsync = promisify(fs.unlink);
 const logger = require('../config/logger');
 const { Photos } = require('../models');
 const ApiError = require('../utils/ApiError');
@@ -93,8 +91,6 @@ const replacePhoto = async (id, file) => {
     const thumbnailPath = `uploads/${newNameThumb}.webp`;
     const newThumbnail = await uploadToS3(thumbnailPath, newNameThumb, bucketThumbnail);
 
-    // await unlinkAsync(file.path);
-    // await unlinkAsync(thumbnailPath);
     deleteFile(file.path);
     deleteFile(thumbnailPath);
 
@@ -128,8 +124,6 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
 
     // const meta = await sharp(file.path).metadata();
 
-    // await unlinkAsync(file.path);
-    // await unlinkAsync(thumbnailPath);
     deleteFile(file.path);
     deleteFile(thumbnailPath);
 

@@ -16,13 +16,12 @@ const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
 
-const middleware = Bugsnag.getPlugin('express');
-
 Bugsnag.start({
   apiKey: process.env.BUGSNAG_API_KEY,
   plugins: [BugsnagPluginExpress],
-  otherOptions: value,
 });
+
+const middleware = Bugsnag.getPlugin('express');
 
 const app = express();
 

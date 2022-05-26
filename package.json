@@ -49,6 +49,8 @@
     "prettier"
   ],
   "dependencies": {
+    "@bugsnag/js": "^7.16.5",
+    "@bugsnag/plugin-express": "^7.16.3",
     "@elastic/elasticsearch": "7.10",
     "aws-sdk": "^2.1077.0",
     "bcryptjs": "^2.4.3",

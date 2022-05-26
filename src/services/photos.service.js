@@ -8,6 +8,7 @@ const logger = require('../config/logger');
 const { Photos } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { addToSearchIndex, updateSearchIndex, searchIndex } = require('../middlewares/elasticsearch');
+const Bugsnag = require("@bugsnag/js");
 
 const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION,
@@ -108,6 +109,7 @@ const replacePhoto = async (id, file) => {
     await updateSearchIndex(id, newPhotoDetails);
     return update;
   } catch (err) {
+    Bugsnag.notify(err);
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err);
   }
 };
@@ -153,6 +155,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
     logger.info(`photo (${url}) uploaded successfully`);
     return data;
   } catch (error) {
+    Bugsnag.notify(error);
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
 };
@@ -169,6 +172,7 @@ const batchUploadPhoto = async (data, files, userId) => {
     logger.info(`bulk photo write action finished successfully`);
     return response;
   } catch (error) {
+    Bugsnag.notify(error);
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
 };

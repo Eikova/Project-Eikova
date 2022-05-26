@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Bugsnag = require('@bugsnag/js');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
@@ -17,12 +18,14 @@ startSearchEngine()
     logger.info('Elasticsearch is ready!');
   })
   .catch((err) => {
+    Bugsnag.notify(err);
     logger.error(err);
   });
 
 const exitHandler = () => {
   if (server) {
     server.close(() => {
+      Bugsnag.notify(new Error('Server closed'));
       logger.info('Server closed');
       process.exit(1);
     });
@@ -32,6 +35,7 @@ const exitHandler = () => {
 };
 
 const unexpectedErrorHandler = (error) => {
+  Bugsnag.notify(error);
   logger.error(error);
   exitHandler();
 };

@@ -76,7 +76,7 @@ const replacePhoto = async (id, file) => {
     if (!photo) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Photo not found');
     }
-    const meta = await getMetadata(file.path);
+    // const meta = await getMetadata(file.path);
 
     // destroy old photo
     const { url, thumbnail } = photo;
@@ -103,7 +103,7 @@ const replacePhoto = async (id, file) => {
     const newPhotoDetails = {
       url: newPhoto.Location,
       thumbnail: newThumbnail.Location,
-      metadata: meta,
+      // metadata: meta,
     };
     const update = await Photos.findByIdAndUpdate(id, newPhotoDetails);
     await updateSearchIndex(id, newPhotoDetails);
@@ -115,7 +115,7 @@ const replacePhoto = async (id, file) => {
 };
 
 const uploadPhoto = async (obj, file, userId, isDraft = false) => {
-  const meta = await getMetadata(file.path);
+  // const meta = await getMetadata(file.path);
   const str = obj.title.replaceAll(' ', '_');
   const fileNameMain = `${str}_main_${Date.now()}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;
@@ -143,7 +143,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
       month: obj.month,
       meeting: obj.meeting,
       people: obj.people,
-      metadata: meta,
+      // metadata: meta,
       user: userId,
     };
 

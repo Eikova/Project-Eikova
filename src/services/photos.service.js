@@ -4,11 +4,11 @@ const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
 const ExifReader = require('exifreader');
 
+const Bugsnag = require('@bugsnag/js');
 const logger = require('../config/logger');
 const { Photos } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { addToSearchIndex, updateSearchIndex, searchIndex } = require('../middlewares/elasticsearch');
-const Bugsnag = require("@bugsnag/js");
 
 const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION,
@@ -152,7 +152,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
     }
     const data = await Photos.create({ ...photoData });
     const index = await addToSearchIndex(data);
-    logger.info(`photo (${url}) uploaded successfully`);
+    logger.info(`photo (${photoData.url}) uploaded successfully`);
     return data;
   } catch (error) {
     Bugsnag.notify(error);

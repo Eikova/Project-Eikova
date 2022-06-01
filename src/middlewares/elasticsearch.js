@@ -1,6 +1,7 @@
 const { Client } = require('@elastic/elasticsearch');
 const logger = require('../config/logger');
 const photoService = require('../services/photos.service');
+const Bugsnag = require("@bugsnag/js");
 
 const host = process.env.ELASTICSEARCH_HOST || 'http://localhost:9200';
 const index = process.env.ELASTICSEARCH_INDEX || 'eikova';
@@ -16,6 +17,7 @@ const populateIndex = async () => {
     logger.info(`Index (${index}) populated!`);
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 
@@ -73,6 +75,7 @@ const deleteIndex = async () => {
     logger.info(`Index ${index} deleted!`);
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 
@@ -85,6 +88,7 @@ const addToSearchIndex = async (photo) => {
     logger.info('Added to search index successfully!');
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 
@@ -100,6 +104,7 @@ const updateSearchIndex = async (id, photo) => {
     logger.info('Updated search index successfully!');
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 
@@ -112,6 +117,7 @@ const getFromIndexById = async (id) => {
     return body;
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 
@@ -130,6 +136,7 @@ const getFromIndexByPhotoId = async (photoId) => {
     return body;
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 
@@ -143,12 +150,15 @@ const deleteFromSearchIndex = async (id) => {
     logger.info('Deleted from search index successfully!');
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 
 const searchIndex = async (phrase, options) => {
   try {
     return await client.search({
+      from: options.start ? options.start : 0,
+      size: options.limit ? options.limit : 10,
       index,
       body: {
         query: {
@@ -174,10 +184,12 @@ const searchIndex = async (phrase, options) => {
             minimum_should_match: 2,
           },
         },
+        sort: [{ createdAt: { order: options.sortBy } }],
       },
     });
   } catch (err) {
     logger.error(err);
+    Bugsnag.notify(err);
   }
 };
 

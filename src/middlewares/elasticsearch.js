@@ -157,7 +157,7 @@ const deleteFromSearchIndex = async (id) => {
 const searchIndex = async (phrase, options) => {
   try {
     return await client.search({
-      from: options.start ? options.start : 0,
+      from: options.skip ? options.skip : 0,
       size: options.limit ? options.limit : 10,
       index,
       body: {

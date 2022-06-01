@@ -7,7 +7,7 @@ const { PhotoService } = require('../services');
 
 
 const searchPhotos = catchAsync(async (req, res) => {
-  const options = pick(req.query, ['sortBy', 'limit', 'start', 'page']);
+  const options = pick(req.query, ['sortBy', 'limit', 'skip', 'page']);
   if (req.query.sortBy === 'oldest') {
     options.sortBy = 'asc';
   } else {

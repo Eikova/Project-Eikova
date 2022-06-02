@@ -178,6 +178,7 @@ const batchUploadPhoto = async (data, files, userId) => {
 };
 
 const getPhotos = async (options, people = null) => {
+  // logger.info(options.sortBy);
   try {
     if (people !== null) {
       return await Photos.find({ type: { $regex: people, $options: 'i' } }).limit(10);

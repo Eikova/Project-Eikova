@@ -14,6 +14,7 @@ const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
 
+
 const app = express();
 
 if (config.env !== 'test') {
@@ -40,6 +41,8 @@ app.use(compression());
 // enable cors
 app.use(cors());
 app.options('*', cors());
+
+
 
 // jwt authentication
 app.use(passport.initialize());

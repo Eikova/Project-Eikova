@@ -29,10 +29,21 @@ const updateUser = catchAsync(async (req, res) => {
   res.send(user);
 });
 
+
+//Just implemented this not sure of use
 const deleteUser = catchAsync(async (req, res) => {
-  await userService.deleteUserById(req.params.userId);
-  res.status(httpStatus.NO_CONTENT).send();
+  await userService.deleteUser(req.params.userId);
+  res.status(httpStatus.OK).send("User deleted Successfully");
 });
+
+
+const toggleStatus = catchAsync(async (req, res) => {
+  const user = await userService.toggleStatus(req.params.userId,req.user)
+
+  res.send(user)
+});
+
+
 
 module.exports = {
   createUser,
@@ -40,4 +51,6 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  toggleStatus
+
 };

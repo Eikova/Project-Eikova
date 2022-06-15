@@ -6,9 +6,8 @@ const { roles } = require('../config/roles');
 
 const userSchema = mongoose.Schema(
   {
-    name: {
+    username: {
       type: String,
-      required: true,
       trim: true,
     },
     email: {
@@ -17,30 +16,35 @@ const userSchema = mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error('Invalid email');
-        }
-      },
     },
     password: {
       type: String,
-      required: true,
       trim: true,
-      minlength: 8,
-      validate(value) {
-        if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-          throw new Error('Password must contain at least one letter and one number');
-        }
-      },
+      minlength: 6,
       private: true, // used by the toJSON plugin
     },
     role: {
       type: String,
       enum: roles,
-      default: 'user',
+    },
+    status: {
+      type: String,
+      enum: ['enabled', 'disabled'],
+      default: 'disabled',
+    },
+    department: {
+      type: String,
+      trim: true,
+    },
+    position: {
+      type: String,
+      trim: true,
     },
     isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isDeleted: {
       type: Boolean,
       default: false,
     },
@@ -49,6 +53,15 @@ const userSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+userSchema.virtual('photos', {
+  ref: 'Photos',
+  localField: '_id',
+  foreignField: 'user',
+});
+
+userSchema.set('toObject', { virtuals: true });
+userSchema.set('toJSON', { virtuals: true });
 
 // add plugin that converts mongoose to json
 userSchema.plugin(toJSON);

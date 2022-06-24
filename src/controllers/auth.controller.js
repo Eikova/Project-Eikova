@@ -77,7 +77,7 @@ const verifyInvite = catchAsync(async (req, res) => {
 const invite = catchAsync(async (req, res) => {
   const { username, email, role } = req.body;
   let user = await userService.getUserByEmail(email);
-  if (user) {
+  if (!user.isDeleted) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'User already Exists');
   }
   user = await authService.inviteUser(username, email, role, req.user);

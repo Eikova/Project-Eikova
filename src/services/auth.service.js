@@ -102,7 +102,7 @@ const verifyInvitation = async(token)=>{
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  await Token.deleteMany({ user: user.id, type: tokenTypes.USER_INVITATION });
+  // await Token.deleteMany({ user: user.id, type: tokenTypes.USER_INVITATION });
   return user
 }
 catch{

@@ -12,7 +12,16 @@ const Token = require('../models/token.model');
  */
 const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    const user = await getUserByEmail(userBody.email)
+    //check if a user has been deleted so that he can be re invited again
+    if(user.isDeleted=== false){
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    }
+    else{
+      //now delete the user to add the user again
+      await deleteUserById(user.id)
+    }
+    
   }
   return User.create(userBody);
 };
@@ -49,6 +58,7 @@ const getUserById = async (id) => {
 const getUserByEmail = async (email) => {
   return User.findOne({ email });
 };
+
 
 /**
  * Update user by id

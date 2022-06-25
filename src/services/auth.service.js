@@ -36,7 +36,7 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 
 
 //Correct saving to DB before mail
-const inviteUser = async(name,email,role,author)=>{
+const inviteUser = async(username,email,role,author)=>{
   if(author.role === 'admin' && (role=== 'super-admin' || role === 'admin' )){
     throw new ApiError(httpStatus.BAD_REQUEST, 'You are not allowed to perform this action');
   }
@@ -51,7 +51,7 @@ const inviteUser = async(name,email,role,author)=>{
     //   throw new ApiError(httpStatus.BAD_REQUEST, 'Invite already sent');
     // }
 
-  let user = await userService.createUser({ name, email, role });
+  let user = await userService.createUser({ username, email, role });
       const token = await tokenService.generateUserInvitationToken(user)
 
       logger.info(`User with email: (${email}) provisioned for ${role} role.`);

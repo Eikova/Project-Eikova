@@ -80,7 +80,7 @@ const invite = catchAsync(async (req, res) => {
   if (user && user.isDeleted === true) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'User already Exists');
   }
-  user = await authService.inviteUser(username, email, role, req.user);ß
+  user = await authService.inviteUser(username, email, role, req.user);
   await emailService.sendInviteEmail(email, user.token.userInvitationToken, username);
   res.status(httpStatus.OK).send('Invite sent Successfully');
 });

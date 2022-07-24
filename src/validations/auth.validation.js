@@ -8,7 +8,7 @@ const register = {
     username: Joi.string(),
     position: Joi.string(),
     department: Joi.string(),
-    token: Joi.string()
+    token: Joi.string(),
   }),
 };
 
@@ -21,19 +21,17 @@ const login = {
 
 const invite = {
   body: Joi.object().keys({
-    username:  Joi.string().required(),
+    username: Joi.string().required(),
     email: Joi.string().required(),
     role: Joi.string().required(),
-
   }),
 };
 
 const invite2 = {
   body: Joi.object().keys({
-    username:  Joi.string().required(),
+    username: Joi.string().required(),
     email: Joi.string().required(),
     role: Joi.string().required(),
-
   }),
 };
 
@@ -108,5 +106,5 @@ module.exports = {
   invite,
   verifyInvite,
   invite2,
-  resendInvite
+  resendInvite,
 };

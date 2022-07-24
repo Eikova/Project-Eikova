@@ -300,6 +300,14 @@ const searchPhotos = async (query, options) => {
   }
 };
 
+const adminGetPhotos = async () => {
+  try {
+    return await Photos.find();
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
+
 module.exports = {
   uploadPhoto,
   batchUploadPhoto,
@@ -314,4 +322,5 @@ module.exports = {
   replacePhoto,
   getContributions,
   searchPhotos,
+  adminGetPhotos,
 };

@@ -1,7 +1,8 @@
 const { Client } = require('@elastic/elasticsearch');
+const Bugsnag = require('@bugsnag/js');
 const logger = require('../config/logger');
-const photoService = require('../services/photos.service');
-const Bugsnag = require("@bugsnag/js");
+// const photoService = require('../services/photos.service');
+const { photoService } = require('../services');
 
 const host = process.env.ELASTICSEARCH_HOST || 'http://localhost:9200';
 const index = process.env.ELASTICSEARCH_INDEX || 'eikova';
@@ -9,7 +10,7 @@ const client = new Client({ node: host });
 
 const populateIndex = async () => {
   try {
-    const photos = await photoService.getPhotos();
+    const photos = await photoService.adminGetPhotos();
     await client.bulk({
       index,
       body: photos,
@@ -20,6 +21,7 @@ const populateIndex = async () => {
     Bugsnag.notify(err);
   }
 };
+
 
 const createIndex = async () => {
   const body = {
@@ -48,8 +50,9 @@ const createIndex = async () => {
   };
   try {
     await client.indices.create({ index, body });
+    // await client.indices.create({ index });
     logger.info(`Index ${index} created`);
-    await populateIndex();
+    // await populateIndex();
   } catch (err) {
     if (err.statusCode === 400) {
       logger.info(`index (${index}) already exists!`);
@@ -163,7 +166,7 @@ const searchIndex = async (phrase, options) => {
       body: {
         query: {
           bool: {
-            should: [
+            must: [
               {
                 term: {
                   is_private: false,
@@ -177,16 +180,30 @@ const searchIndex = async (phrase, options) => {
               {
                 multi_match: {
                   query: phrase,
-                  fields: ['title^3', 'description', 'tags^2', 'year', 'month', 'meeting', 'people'], // add people_id
+                  type: 'cross_fields',
+                  fields: ['title', 'description', 'tags', 'year', 'month', 'meeting', 'people'],
                 },
               },
             ],
-            minimum_should_match: 2,
+            // minimum_should_match: 2,
           },
         },
-        sort: [{ createdAt: { order: options.sortBy } }],
+        // sort: [{ createdAt: { order: options.sortBy } }],
       },
     });
+  } catch (err) {
+    logger.error(err);
+    Bugsnag.notify(err);
+  }
+};
+
+const adminPopulateIndex = async (photos) => {
+  try {
+    await client.bulk({
+      index,
+      body: photos,
+    });
+    logger.info(`Index (${index}) populated!`);
   } catch (err) {
     logger.error(err);
     Bugsnag.notify(err);
@@ -204,4 +221,5 @@ module.exports = {
   getFromIndexById,
   getFromIndexByPhotoId,
   searchIndex,
+  adminPopulateIndex,
 };

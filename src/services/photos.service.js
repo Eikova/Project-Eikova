@@ -3,6 +3,7 @@ const sharp = require('sharp');
 const S3 = require('aws-sdk/clients/s3');
 const fs = require('fs');
 const ExifReader = require('exifreader');
+const mime = require('mime-types');
 
 const Bugsnag = require('@bugsnag/js');
 const logger = require('../config/logger');
@@ -87,7 +88,8 @@ const replacePhoto = async (id, file) => {
 
     // process new photo
     const str = photo.title.replaceAll(' ', '_');
-    const newNameMain = `${str}_main_${Date.now()}`;
+    const ext = mime.extension(file.mimetype);
+    const newNameMain = `${str}_main_${Date.now()}.${ext}`;
     const newNameThumb = `${str}_thumb_${Date.now()}`;
     const newPhoto = await uploadToS3(file.path, newNameMain, bucketMain);
 
@@ -116,9 +118,12 @@ const replacePhoto = async (id, file) => {
 
 const uploadPhoto = async (obj, file, userId, isDraft = false) => {
   // const meta = await getMetadata(file.path);
+  const ext = mime.extension(file.mimetype);
   const str = obj.title.replaceAll(' ', '_');
-  const fileNameMain = `${str}_main_${Date.now()}`;
+  // const str = obj.title.replace(/ /g, '_');
+  const fileNameMain = `${str}_main_${Date.now()}.${ext}`;
   const fileNameThumb = `${str}_thumb_${Date.now()}`;
+
   try {
     const bucketMain = process.env.AWS_BUCKET_MAIN;
     const photo = await uploadToS3(file.path, fileNameMain, bucketMain);

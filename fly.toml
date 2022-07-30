@@ -1,7 +1,6 @@
-# fly.toml file generated for eikova-api on 2022-05-26T18:48:40+01:00
+# fly.toml file generated for eikova-api on 2022-07-25T09:18:02+01:00
 
 app = "eikova-api"
-
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
@@ -22,7 +21,6 @@ processes = []
   processes = ["app"]
   protocol = "tcp"
   script_checks = []
-
   [services.concurrency]
     hard_limit = 25
     soft_limit = 20

@@ -77,9 +77,9 @@ const getPhotos = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   options.populate = 'user';
   if (req.query.sortBy === 'oldest') {
-    options.sortBy = 'asc';
+    options.sortBy = 'createdAt:asc';
   } else {
-    options.sortBy = 'desc';
+    options.sortBy = 'createdAt:desc';
   }
   let photos;
   if (req.query.people) {

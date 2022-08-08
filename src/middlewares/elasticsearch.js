@@ -174,6 +174,11 @@ const searchIndex = async (phrase, options) => {
               },
               {
                 term: {
+                  is_deleted: false,
+                },
+              },
+              {
+                term: {
                   is_published: true,
                 },
               },

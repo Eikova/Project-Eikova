@@ -1,4 +1,4 @@
-# fly.toml file generated for eikova-api on 2022-07-30T17:37:10+01:00
+# fly.toml file generated for eikova-api on 2022-08-08T07:15:00+01:00
 
 app = "eikova-api"
 kill_signal = "SIGINT"

@@ -32,6 +32,19 @@ const generateToken = (userId, username, email, role, expires, type, secret = co
   return jwt.sign(payload, secret);
 };
 
+const generateUserToken = (userId, username, email, role, expires, type, secret = config.jwt.secret) => {
+  const payload = {
+    name: username,
+    email,
+    role,
+    sub: userId,
+    iat: moment().unix(),
+    exp: expires.unix(),
+    type,
+  };
+  return jwt.sign(payload, secret);
+};
+
 /**
  * Save a token
  * @param {string} token
@@ -164,8 +177,9 @@ const generateSignUpToken = async (user) => {
 };
 
 const generateOneTimeToken = async (user) => {
-  const expires = moment().add(config.jwt.oneTimeTokenExpirationMinutes, 'minutes');
-  const oneTimeToken = generateToken(user.id, user.username, user.email, user.role, expires, tokenTypes.ACCESS);
+  const expires = moment().add(2880, 'minutes');
+  console.log(expires)
+  const oneTimeToken = generateUserToken(user.id, user.username, user.email, user.role, expires, tokenTypes.ACCESS);
   await saveToken(oneTimeToken, user.id, expires, tokenTypes.ACCESS);
   return oneTimeToken;
 };
@@ -180,4 +194,5 @@ module.exports = {
   generateUserInvitationToken,
   generateSignUpToken,
   generateOneTimeToken,
+  generateUserToken,
 };

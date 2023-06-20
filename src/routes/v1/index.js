@@ -7,6 +7,8 @@ const tagRoute = require('./tags.route');
 const peopleRoute = require('./people.route');
 const meetingRoute = require('./meeting.route');
 const searchRoute = require('./search.route');
+const dashboardRoute = require('./dashboard.route');
+const locationRoute = require('./location.route')
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -39,6 +41,14 @@ const defaultRoutes = [
   {
     path: '/search',
     route: searchRoute,
+  },
+  {
+    path: '/dashboard',
+    route: dashboardRoute,
+  },
+  {
+    path: '/location',
+    route: locationRoute,
   },
 ];
 

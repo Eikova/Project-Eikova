@@ -2,9 +2,11 @@ const httpStatus = require('http-status');
 const { People } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
+// const
 
 const getPeople = async () => {
   const people = await People.find({});
+  // const j = await People.
   if (!people) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No People found');
   }
@@ -44,8 +46,7 @@ const getPerson = async (personId) => {
 };
 
 const updatePeople = async (peopleId, peopleBody) => {
-  const people = { name: peopleBody.name };
-  const response = await People.findByIdAndUpdate(peopleId, people, { new: true });
+  const response = await People.findByIdAndUpdate(peopleId, peopleBody, { new: true });
   if (!response) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Person not found');
   }

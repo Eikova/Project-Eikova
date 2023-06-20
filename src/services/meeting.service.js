@@ -22,7 +22,7 @@ const createMeeting = async (meeting, user) => {
   return query;
 };
 
-const searchMeeting= async (meeting) => {
+const searchMeeting = async (meeting) => {
   const meetings = await Meeting.find({ name: { $regex: meeting, $options: 'i' } }).limit(10);
   if (!meetings) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Meeting found');
@@ -39,8 +39,7 @@ const getAMeeting = async (meetingId) => {
 };
 
 const updateMeeting = async (meetingId, meetingBody) => {
-  const meeting = { name: meetingBody.name };
-  const response = await Meeting.findByIdAndUpdate(meetingId, meeting, { new: true });
+  const response = await Meeting.findByIdAndUpdate(meetingId, meetingBody, { new: true });
   if (!response) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Meeting not found');
   }

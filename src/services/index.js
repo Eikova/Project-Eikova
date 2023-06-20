@@ -8,3 +8,6 @@ module.exports.TagService = require('./tags.service');
 module.exports.PeopleService = require('./people.service');
 module.exports.MeetingService = require('./meeting.service');
 module.exports.SearchService = require('../middlewares/elasticsearch');
+module.exports.DashboardService = require('./dashboard.service');
+module.exports.LocationService = require('./location.service');
+

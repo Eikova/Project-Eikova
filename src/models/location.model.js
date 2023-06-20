@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const { toJSON, paginate } = require('./plugins');
-const { peopleEnum } = require('../enums/people.enum');
 
-const PeopleSchema = mongoose.Schema({
+const LocationSchema = mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -12,9 +11,8 @@ const PeopleSchema = mongoose.Schema({
     unique: true,
   },
 
-  type: {
+  address: {
     type: String,
-    enum: [peopleEnum.SONG_MINISTER, peopleEnum.MINISTER, peopleEnum.OTHERS],
     required: true,
     trim: true,
     minlength: 4,
@@ -29,12 +27,12 @@ const PeopleSchema = mongoose.Schema({
 });
 
 // add plugin that converts mongoose to json
-PeopleSchema.plugin(toJSON);
-PeopleSchema.plugin(paginate);
+LocationSchema.plugin(toJSON);
+LocationSchema.plugin(paginate);
 
 /**
  * @typedef People
  */
-const People = mongoose.model('People', PeopleSchema);
+const Location = mongoose.model('Location', LocationSchema);
 
-module.exports = People;
+module.exports = Location;

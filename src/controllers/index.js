@@ -6,3 +6,5 @@ module.exports.tagController = require('./tags.controller');
 module.exports.peopleController = require('./people.controller');
 module.exports.meetingController = require('./meeting.controller');
 module.exports.searchController = require('./search.controller');
+module.exports.dashboardController = require('./dashboard.controller');
+module.exports.locationController = require('./location.controller');

@@ -5,3 +5,4 @@ module.exports.Photos = require('./photos.model');
 module.exports.Tag = require('./tags.model');
 module.exports.People = require('./people.model');
 module.exports.Meeting = require('./meeting.model');
+module.exports.Location = require('./location.model');

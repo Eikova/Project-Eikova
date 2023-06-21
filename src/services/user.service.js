@@ -90,6 +90,14 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+const searchUsers = async (user, options) => {
+  const users = await User.paginate({ username: { $regex: user, $options: 'i' } }, options);
+  if (!users) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No User found');
+  }
+  return users;
+};
+
 const toggleStatus = async (userId, actor) => {
   let updateBody;
   const user = await getUserById(userId);
@@ -139,4 +147,5 @@ module.exports = {
   deleteUserById,
   toggleStatus,
   deleteUser,
+  searchUsers,
 };

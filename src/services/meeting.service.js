@@ -3,8 +3,9 @@ const { Meeting } = require('../models');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
 
-const getMeeting = async () => {
-  const meeting = await Meeting.find({});
+const getMeeting = async (filter, options) => {
+  options.populate = 'author';
+  const meeting = await Meeting.paginate(filter, options);
   if (!meeting) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Meeting found');
   }

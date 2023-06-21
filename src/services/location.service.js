@@ -14,6 +14,7 @@ const logger = require('../config/logger');
  */
 
 const getLocations = async (filter, options) => {
+  options.populate = 'author';
   const location = await Location.paginate(filter, options);
   return location;
 };

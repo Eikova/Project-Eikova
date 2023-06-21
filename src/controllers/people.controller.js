@@ -1,6 +1,8 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { PeopleService } = require('../services');
+const pick = require('../utils/pick');
+
 
 const createPeople = catchAsync(async (req, res) => {
   const people = await PeopleService.createPeople(req.body.name, req.body.type, req.user.id);
@@ -11,7 +13,9 @@ const createPeople = catchAsync(async (req, res) => {
 });
 
 const getAllPeople = catchAsync(async (req, res) => {
-  const people = await PeopleService.getPeople();
+  const filter = pick(req.query, ['name', 'type']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const people = await PeopleService.getPeople(filter,options);
   res.status(httpStatus.OK).json({
     status: 'success',
     people,

@@ -10,12 +10,12 @@ const router = express.Router();
 router
   .route('/')
   .post(auth('manageUsers'), validate(userValidation.createUser), userController.createUser)
-  .get( validate(userValidation.getUsers), userController.getUsers);
+  .get(validate(userValidation.getUsers), userController.getUsers);
 
-  router
-  .route('/delete/:userId')
-  .patch(auth('deleteUser'), validate(userValidation.deleteUser), userController.deleteUser)
-  // .patch( validate(userValidation.deleteUser), userController.deleteUser);
+router.route('/search').get(auth('manageUsers'), userController.searchUsers);
+
+router.route('/delete/:userId').patch(auth('deleteUser'), validate(userValidation.deleteUser), userController.deleteUser);
+// .patch( validate(userValidation.deleteUser), userController.deleteUser);
 router
   .route('/:userId')
   .get(auth('getUsers'), validate(userValidation.getUser), userController.getUser)
@@ -26,9 +26,7 @@ router.route('/send-otp').post(otpController.sendOTP);
 router.route('/verify-otp').post(otpController.verifyOTP);
 router
   .route('/:userId/status')
-  .patch(auth('toggleStatus'), validate(userValidation.toggleStatus), userController.toggleStatus)
-
-
+  .patch(auth('toggleStatus'), validate(userValidation.toggleStatus), userController.toggleStatus);
 
 // router
 //   .route('delete/:userId/del')

@@ -4,12 +4,9 @@ const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
 // const
 
-const getPeople = async () => {
-  const people = await People.find({});
-  // const j = await People.
-  if (!people) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'No People found');
-  }
+const getPeople = async (filter, options) => {
+  options.populate = 'author';
+  const people = await People.paginate(filter, options);
   return people;
 };
 

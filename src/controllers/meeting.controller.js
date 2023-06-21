@@ -1,6 +1,8 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { MeetingService } = require('../services');
+const pick = require('../utils/pick');
+
 
 const createMeeting = catchAsync(async (req, res) => {
   const meeting = await MeetingService.createMeeting(req.body.name, req.user.id);
@@ -11,7 +13,9 @@ const createMeeting = catchAsync(async (req, res) => {
 });
 
 const getAllMeetings = catchAsync(async (req, res) => {
-  const meeting = await MeetingService.getMeeting();
+  const filter = pick(req.query, ['name']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const meeting = await MeetingService.getMeeting(filter,options);
   res.status(httpStatus.OK).json({
     status: 'success',
     meeting,

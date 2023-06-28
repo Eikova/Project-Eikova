@@ -51,6 +51,9 @@ const PhotoSchema = mongoose.Schema(
     people: {
       type: String,
     },
+    location: {
+      type: String,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

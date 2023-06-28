@@ -24,7 +24,7 @@ const deleteFile = (path) => {
   });
 };
 
-const uploadToS3 = async(path, newName, bucket) => {
+const uploadToS3 = async (path, newName, bucket) => {
   const fileStream = fs.createReadStream(path);
 
   // Setting up S3 upload parameters
@@ -148,6 +148,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
       month: obj.month,
       meeting: obj.meeting,
       people: obj.people,
+      location: obj.location,
       // metadata: meta,
       user: userId,
     };
@@ -274,6 +275,7 @@ const updatePhoto = async (id, obj) => {
     data.month = obj.month ? obj.month : photo.month;
     data.meeting = obj.meeting ? obj.meeting : photo.meeting;
     data.people = obj.people ? obj.people : photo.people;
+    data.location = obj.location ? obj.location : photo.location;
 
     const updateDetails = { ...data, modified_at: Date.now() };
     const update = await Photos.findByIdAndUpdate(id, updateDetails, { new: true });

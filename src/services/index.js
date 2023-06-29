@@ -10,4 +10,5 @@ module.exports.MeetingService = require('./meeting.service');
 module.exports.SearchService = require('../middlewares/elasticsearch');
 module.exports.DashboardService = require('./dashboard.service');
 module.exports.LocationService = require('./location.service');
-
+module.exports.FolderService = require('./folder.service');
+module.exports.SubFolderService = require('./subfolder.service');

@@ -8,7 +8,9 @@ const peopleRoute = require('./people.route');
 const meetingRoute = require('./meeting.route');
 const searchRoute = require('./search.route');
 const dashboardRoute = require('./dashboard.route');
-const locationRoute = require('./location.route')
+const locationRoute = require('./location.route');
+const folderRoute = require('./folder.route');
+const subFolderRoute = require('./subfolder.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -49,6 +51,14 @@ const defaultRoutes = [
   {
     path: '/location',
     route: locationRoute,
+  },
+  {
+    path: '/folder',
+    route: folderRoute,
+  },
+  {
+    path: '/subfolder',
+    route: subFolderRoute,
   },
 ];
 

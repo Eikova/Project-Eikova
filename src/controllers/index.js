@@ -8,3 +8,5 @@ module.exports.meetingController = require('./meeting.controller');
 module.exports.searchController = require('./search.controller');
 module.exports.dashboardController = require('./dashboard.controller');
 module.exports.locationController = require('./location.controller');
+module.exports.folderController = require('./folder.controller');
+module.exports.subFolderController = require('./subFolder.controller');

@@ -7,7 +7,7 @@ const mime = require('mime-types');
 
 const Bugsnag = require('@bugsnag/js');
 const logger = require('../config/logger');
-const { Photos } = require('../models');
+const { Photos, Folder, SubFolder } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { addToSearchIndex, updateSearchIndex, searchIndex } = require('../middlewares/elasticsearch');
 
@@ -116,7 +116,7 @@ const replacePhoto = async (id, file) => {
   }
 };
 
-const uploadPhoto = async (obj, file, userId, isDraft = false) => {
+const uploadPhoto = async (obj, file, userId, isDraft = false, isFolder = false) => {
   // const meta = await getMetadata(file.path);
   const ext = mime.extension(file.mimetype);
   const str = obj.title.replaceAll(' ', '_');
@@ -155,6 +155,16 @@ const uploadPhoto = async (obj, file, userId, isDraft = false) => {
 
     if (!isDraft) {
       photoData.is_published = true;
+    }
+
+    //add picture to folder if there is a folder
+    if (isDraft && obj.folderId) {
+      await Folder.findByIdAndUpdate(obj.folderId, { photos: photoData });
+    }
+
+    //add picture to subfolder if there is a folder
+    if (isDraft && obj.subFolderId) {
+      await SubFolder.findByIdAndUpdate(obj.subFolderId, { photos: photoData });
     }
     const data = await Photos.create({ ...photoData });
     const index = await addToSearchIndex(data);

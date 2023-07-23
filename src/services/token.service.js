@@ -89,7 +89,6 @@ const verifyToken = async (token, type) => {
 //   return tokenDoc;
 // };
 
-
 // const revokeUserInvitationTokens = async (user) => {
 //   await Token.deleteMany({ user: user.id, type: tokenTypes.USER_INVITATION });
 //   return true;
@@ -178,12 +177,10 @@ const generateSignUpToken = async (user) => {
 
 const generateOneTimeToken = async (user) => {
   const expires = moment().add(2880, 'minutes');
-  console.log(expires)
   const oneTimeToken = generateUserToken(user.id, user.username, user.email, user.role, expires, tokenTypes.ACCESS);
   await saveToken(oneTimeToken, user.id, expires, tokenTypes.ACCESS);
   return oneTimeToken;
 };
-
 module.exports = {
   generateToken,
   saveToken,

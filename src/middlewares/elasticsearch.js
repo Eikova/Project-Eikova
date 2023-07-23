@@ -2,7 +2,7 @@ const { Client } = require('@elastic/elasticsearch');
 const Bugsnag = require('@bugsnag/js');
 const logger = require('../config/logger');
 // const photoService = require('../services/photos.service');
-const { photoService } = require('../services');
+const { PhotoService } = require('../services');
 
 const host = process.env.ELASTICSEARCH_HOST || 'http://localhost:9200';
 const index = process.env.ELASTICSEARCH_INDEX || 'eikova';
@@ -10,7 +10,7 @@ const client = new Client({ node: host });
 
 const populateIndex = async () => {
   try {
-    const photos = await photoService.adminGetPhotos();
+    const photos = await PhotoService.adminGetPhotos();
     await client.bulk({
       index,
       body: photos,

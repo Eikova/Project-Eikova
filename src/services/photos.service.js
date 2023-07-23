@@ -9,7 +9,7 @@ const Bugsnag = require('@bugsnag/js');
 const logger = require('../config/logger');
 const { Photos, Folder, SubFolder } = require('../models');
 const ApiError = require('../utils/ApiError');
-const { addToSearchIndex, updateSearchIndex, searchIndex } = require('../middlewares/elasticsearch');
+const { createIndex, searchIndex, updateSearchIndex } = require('../middlewares/algoliasearch');
 
 const s3 = new S3({
   region: process.env.AWS_DEFAULT_REGION,
@@ -167,7 +167,7 @@ const uploadPhoto = async (obj, file, userId, isDraft = false, isFolder = false)
       await SubFolder.findByIdAndUpdate(obj.subFolderId, { photos: photoData });
     }
     const data = await Photos.create({ ...photoData });
-    const index = await addToSearchIndex(data);
+    await createIndex(data);
     logger.info(`photo (${photoData.url}) uploaded successfully`);
     return data;
   } catch (error) {

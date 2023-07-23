@@ -3,7 +3,8 @@ const Bugsnag = require('@bugsnag/js');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-const { startSearchEngine } = require('./middlewares/elasticsearch');
+// const { startSearchEngine } = require('./middlewares/elasticsearch');
+const { startSearchEngine } = require('./middlewares/algoliasearch');
 
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
@@ -13,9 +14,11 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   });
 });
 
+mongoose.set('useFindAndModify', false);
+
 startSearchEngine()
   .then(() => {
-    logger.info('Elasticsearch is ready!');
+    logger.info('AlgoElasticsearch is ready!');
   })
   .catch((err) => {
     Bugsnag.notify(err);

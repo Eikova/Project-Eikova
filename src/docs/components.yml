@@ -14,10 +14,15 @@ components:
           type: string
           enum: [user, admin]
       example:
-        id: 5ebac534954b54139806c112
-        email: fake@example.com
-        name: fake name
-        role: user
+        role: "admin"
+        status: "disabled"
+        isEmailVerified: false
+        name: "Ayorb"
+        email: "user960@gmail.com"
+        id: "621a3641bbd697ee9311a58d" 
+
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MjFhMzY0MWJiZDY5N2VlOTMxMWE1OGQiLCJpYXQiOjE2NDU4ODQ5OTMsImV4cCI6MTY0NTg4ODU5MywidHlwZSI6Imludml0ZUVtYWlsIn0.Ire4_75xx5Sh94PzE2xsE7dSxEd230D2nh0EeEKBJPs"
+          
 
     Token:
       type: object

@@ -5,7 +5,10 @@ const register = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
-    name: Joi.string().required(),
+    username: Joi.string(),
+    position: Joi.string(),
+    department: Joi.string(),
+    token: Joi.string(),
   }),
 };
 
@@ -13,6 +16,22 @@ const login = {
   body: Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
+  }),
+};
+
+const invite = {
+  body: Joi.object().keys({
+    username: Joi.string().required(),
+    email: Joi.string().required(),
+    role: Joi.string().required(),
+  }),
+};
+
+const invite2 = {
+  body: Joi.object().keys({
+    username: Joi.string().required(),
+    email: Joi.string().required(),
+    role: Joi.string().required(),
   }),
 };
 
@@ -49,6 +68,33 @@ const verifyEmail = {
   }),
 };
 
+const verifyInvite = {
+  query: Joi.object().keys({
+    token: Joi.string().required(),
+  }),
+};
+
+// const verifyUserInvite = {
+//   query: Joi.object().keys({
+//     token: Joi.string().required(),
+//   }),
+// };
+
+// const loginUser = {
+//   query: Joi.object().keys({
+//     token: Joi.string().required(),
+//   }),
+// };
+
+const resendInvite = {
+  body: Joi.object()
+    .keys({
+      email: Joi.string().email(),
+
+    })
+    .min(1),
+};
+
 module.exports = {
   register,
   login,
@@ -57,4 +103,8 @@ module.exports = {
   forgotPassword,
   resetPassword,
   verifyEmail,
+  invite,
+  verifyInvite,
+  invite2,
+  resendInvite,
 };

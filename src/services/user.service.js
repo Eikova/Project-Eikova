@@ -1,6 +1,9 @@
 const httpStatus = require('http-status');
+const { USE_PROXY } = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const { tokenTypes } = require('../config/tokens');
+const Token = require('../models/token.model');
 
 /**
  * Create a user
@@ -9,7 +12,14 @@ const ApiError = require('../utils/ApiError');
  */
 const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    const user = await getUserByEmail(userBody.email);
+    //check if a user has been deleted so that he can be re invited again
+    if (user.isDeleted === false) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    } else {
+      //now delete the user to add the user again
+      await deleteUserById(user.id);
+    }
   }
   return User.create(userBody);
 };
@@ -24,6 +34,7 @@ const createUser = async (userBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryUsers = async (filter, options) => {
+  filter.isDeleted = false;
   const users = await User.paginate(filter, options);
   return users;
 };
@@ -79,6 +90,54 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+const searchUsers = async (user, options) => {
+  const users = await User.paginate({ username: { $regex: user, $options: 'i' } }, options);
+  if (!users) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No User found');
+  }
+  return users;
+};
+
+const toggleStatus = async (userId, actor) => {
+  let updateBody;
+  const user = await getUserById(userId);
+
+  if (actor.role === 'admin' && user.role === 'admin') {
+    throw new ApiError(httpStatus.FORBIDDEN, 'You are not allowed to perform this action');
+  }
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if (user.status === 'enabled') {
+    updateBody = { status: 'disabled' };
+    await Token.deleteMany({ user: user.id, type: tokenTypes.ACCESS });
+  } else {
+    updateBody = { status: 'enabled' };
+  }
+  Object.assign(user, updateBody);
+  await user.save();
+  return user;
+};
+
+const deleteUser = async (userId) => {
+  let updateBody;
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  if (user.isDeleted === true) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'User already Deleted');
+  } else {
+    updateBody = { isDeleted: true };
+  }
+  Object.assign(user, updateBody);
+  await user.save();
+  return user;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -86,4 +145,7 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  toggleStatus,
+  deleteUser,
+  searchUsers,
 };

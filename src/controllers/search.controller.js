@@ -22,8 +22,7 @@ const searchPhotos = catchAsync(async (req, res) => {
 });
 
 const populateIndex = catchAsync(async (req, res) => {
-  const photos = await photoService.adminGetPhotos();
-  // console.log(photos);
+  const photos = await PhotoService.adminGetPhotos();
   try {
     const populate = await SearchService.adminPopulateIndex(photos);
     res.status(httpStatus.OK).json({
